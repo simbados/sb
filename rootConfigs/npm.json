@@ -1,0 +1,11 @@
+{
+	"__root-conf__": {
+		"read": ["**/node_modules/**/*.js", "**/node_modules/**/*.jsx", "**/node_modules/**/*.json", "**/node_modules/**/*.ts", "**/node_modules/**/*.cjs", "**/node_modules/**/*.mjs"],
+		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "../package.json", "../package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**"],
+		"net-out": true,
+		"net-in": true
+	},
+	"install": {
+		"read-write": ["~/.npmrc", "[wd]/.npmrc"]
+	}
+}
