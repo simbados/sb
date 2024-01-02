@@ -1,3 +1,6 @@
-# Constraints
+# Reimplementation of node-safe
 
-- If your binary starts with a - you can not use sb for now
+- Currently in development
+- Reimplementation of node-safe (https://github.com/berstend/node-safe) in go
+
+Release tbd
