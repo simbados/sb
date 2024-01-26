@@ -86,11 +86,9 @@
 
 ; Allow connect to localhost
 (allow network*
-       (to ip "localhost:*")
-       (to ip "127.0.0.1:*"))
+       (to ip "localhost:*"))
 (allow network-inbound
-       (from ip "localhost:*")
-       (to ip "127.0.0.1:*"))
+       (from ip "localhost:*"))
 
 ; This is not necessary for every program, can allow this on a user basis
 (allow process-exec process-exec-interpreter file-read*
@@ -99,3 +97,4 @@
   (literal "/bin/sh")
   (literal "/bin/bash")
   (literal "/usr/sbin")
+)

@@ -1,23 +1,27 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
 
 func parseOptions(paths *Paths, args []string) ([]string, *SbConfig, []string) {
 	var options []string
-	var configs SbConfig
+	var cliConfig SbConfig
 	re := regexp.MustCompile("^-.*")
 	optionsUntilIndex := 0
+	hasCliConfig := false
 	for index, value := range args {
+		fmt.Println("value", value)
 		if re.MatchString(value) {
 			split, splitValue := parseCliConfigParam(value)
 			if _, exist := validCliOptions[split]; exist {
-				options = append(options, expandPaths(paths, value))
+				options = append(options, value)
 				setOption(value)
 			} else if _, configExists := AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
-				addToConfig(&configs, split, expandPaths(paths, splitValue))
+				addToConfig(&cliConfig, split, expandPaths(paths, splitValue))
+				hasCliConfig = true
 			} else {
 				logErr("You passed a wrong cli option: ", value)
 			}
@@ -29,7 +33,11 @@ func parseOptions(paths *Paths, args []string) ([]string, *SbConfig, []string) {
 	if len(options) == len(args) {
 		logErr("Please specify the program that you want to sandbox")
 	}
-	return options, &configs, args[optionsUntilIndex:]
+	if hasCliConfig {
+		return options, &cliConfig, args[optionsUntilIndex:]
+	} else {
+		return options, nil, args[optionsUntilIndex:]
+	}
 }
 
 func parseStringBoolean(s string) (bool, bool) {
@@ -88,6 +96,7 @@ const globSingleRegex = `\*`
 const globSingleReplace = `([^\/]+)?`
 
 func expandPaths(paths *Paths, value string) string {
+	fmt.Println(value)
 	value = strings.ReplaceAll(value, "~", paths.HomePath)
 	value = strings.ReplaceAll(value, "[home]", paths.HomePath)
 	value = strings.ReplaceAll(value, "./", paths.WorkingDir+"/")
@@ -98,6 +107,7 @@ func expandPaths(paths *Paths, value string) string {
 		value = regexp.MustCompile(globEndRegex).ReplaceAllString(value, globEndReplace)
 		value = regexp.MustCompile(globMiddleRegex).ReplaceAllString(value, globMiddleReplace)
 		value = regexp.MustCompile(globSingleRegex).ReplaceAllString(value, globSingleReplace)
+		fmt.Println(value)
 		value = "(regex #\"" + value + "\")"
 	} else {
 		value = "(literal \"" + value + "\")"

@@ -6,8 +6,9 @@ import (
 	"strings"
 )
 
-func doesRootConfigExist(path string) bool {
+func doesRootConfigDirExist(path string) bool {
 	isRootConfigExisting, err := doesPathExist(path)
+	fmt.Println("is existing", isRootConfigExisting, path)
 	if !isRootConfigExisting {
 		logWarn("Root config directory does not exist", err)
 		// TODO: this could be on first run we might want to make sure it exists at this point
@@ -17,89 +18,76 @@ func doesRootConfigExist(path string) bool {
 	return true
 }
 
-func parseConfigFiles(context *Context) {
+// Here we only parse the config files, cli configs have already been parsed
+func parseConfigFiles(context *Context) *SbConfig {
 	globalConfig := &SbConfig{}
-	commandConfig := &SbConfig{}
-	if doesRootConfigExist(context.Paths.RootConfigPath) {
+	localConfigPath := context.Paths.LocalConfigPath + "/" + context.Config.BinaryName + ".json"
+	localConfigExists, _ := doesPathExist(localConfigPath)
+	localConfig := &SbConfig{}
+	if localConfigExists {
+		localConfig = parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
+		logInfo("Using local config file")
+		return localConfig
+	} else {
+		logInfo("No local config file found at: ", localConfigPath)
+		logInfo("Proceeding without local config")
+	}
+	if doesRootConfigDirExist(context.Paths.RootConfigPath) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
 		binaryPathExists, _ := doesPathExist(binaryGlobalConfigPath)
 		if !binaryPathExists {
 			logWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
-			globalConfig = parseRootBinaryConfig(&context.Paths, binaryGlobalConfigPath)
-			if len(context.Config.Commands) > 0 {
-				commandConfig = parseRootCommandConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands[0])
+			globalConfig = parseRootBinaryConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
+			logInfo("Using global config file")
+			return globalConfig
+		}
+	} else {
+		logInfo("No root config file found at: ", context.Paths.RootConfigPath)
+		logInfo("Proceeding without global config")
+	}
+	return nil
+}
+
+func parseRootBinaryConfig(paths *Paths, path string, commands []string) *SbConfig {
+	commands = append(commands, "__root-config__")
+	var configs []*SbConfig
+	configJson := parseJson(path)
+	for key, val := range configJson {
+		for _, command := range commands {
+			if strings.Contains(command, key) {
+				config := val
+				if config == nil {
+					logInfo(fmt.Sprintf("No config found for key: %v in path %v", val, path))
+				} else {
+					permissions, err := parseNextJsonLevel(config)
+					if err {
+						logErr("Malformed root config json, please check your config at path: ", path)
+					}
+					configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
+				}
 			}
 		}
 	}
-	localConfigPath := context.Paths.LocalConfigPath
-	localConfigExists, _ := doesPathExist(localConfigPath)
-	localConfig := &SbConfig{}
-	if localConfigExists {
-		localConfig = parseLocalBinaryConfig(&context.Paths, localConfigPath, context.Config.BinaryName)
+	if len(configs) == 0 {
+		logErr(fmt.Sprintf("You have a config file at path %v, but no parameters were found", path))
 	}
-	// Merge all configs together
-	context.Config.SbConfig = mergeConfig(globalConfig, commandConfig, localConfig, context.Config.CliConfig)
+	return mergeConfig(configs...)
 }
 
-func parseLocalBinaryConfig(paths *Paths, path string, binaryName string) *SbConfig {
-	configJson := parseJson(path)
-	emptyConf := &SbConfig{}
-
-	binaryConfig := configJson[binaryName]
-	if binaryConfig == nil {
-		logWarn("Local config found but no local config for binary")
-		return emptyConf
-	}
-	rootConfLocal, err := parseNextJsonLevel(binaryConfig)
-	if err {
-		logWarn("Error while parsing local config for binary: ", binaryName)
-		return emptyConf
-	}
-
-	rootConf := rootConfLocal["__root-conf__"]
-	if rootConf == nil {
-		logWarn("Local config found for binary but no root config for binary:", binaryName)
-		return emptyConf
-	}
-
-	rootConfMap, errRootConfMap := parseNextJsonLevel(rootConf)
-	if errRootConfMap {
-		logWarn("Error while parsing local config for binary: ", binaryName)
-		return emptyConf
-	}
-	return parseConfigIntoStruct(paths, rootConfMap, path)
-}
-
-func parseRootBinaryConfig(paths *Paths, path string) *SbConfig {
-	configJson := parseJson(path)
-	rootConf := configJson["__root-conf__"]
-	if rootConf == nil {
-		fmt.Printf("Malformed config json, please check your config at path: %s\n", path)
-		os.Exit(1)
-	}
-	permissions, err := parseNextJsonLevel(rootConf)
-	if err {
-		fmt.Printf("Malformed root config json, please check your config at path: %s\n", path)
-		os.Exit(1)
-	}
-	return parseConfigIntoStruct(paths, permissions, path)
-}
-
-func parseRootCommandConfig(paths *Paths, path string, command string) *SbConfig {
-	configJson := parseJson(path)
-	conf := configJson[command]
-	if conf == nil {
-		logWarn("No root config for argument found: ", command)
-		return &SbConfig{}
-	}
-	permissions, err := parseNextJsonLevel(conf)
-	if err {
-		logErr("Malformed root config json, please check your config at path: ", path)
-		os.Exit(1)
-	}
-	return parseConfigIntoStruct(paths, permissions, path)
-}
+//func parseRootCommandConfig(paths *Paths, path string, command string) *SbConfig {
+//	configJson := parseJson(path)
+//	conf := configJson[command]
+//	if conf == nil {
+//		logWarn("No root config for argument found: ", command)
+//		return &SbConfig{}
+//	}
+//	permissions, err := parseNextJsonLevel(conf)
+//	if err {
+//		logErr("Malformed root config json, please check your config at path: ", path)
+//	}
+//	return parseConfigIntoStruct(paths, permissions, path)
+//}
 
 func parseNextJsonLevel(config interface{}) (map[string]interface{}, bool) {
 	rootConf, ok := config.(map[string]interface{})
@@ -163,9 +151,8 @@ func mergeConfig(configToMerge ...*SbConfig) *SbConfig {
 			newConfig.Process = appendUniqueStrings(newConfig.Process, config.Process...)
 			newConfig.ReadWrite = appendUniqueStrings(newConfig.ReadWrite, config.ReadWrite...)
 			// Network in/out-bound can not really be merged if it is prohibited once it should be enforced
-			fmt.Println(newConfig.NetworkInbound, config.NetworkInbound)
-			newConfig.NetworkOutbound = newConfig.NetworkOutbound || config.NetworkOutbound
-			newConfig.NetworkInbound = newConfig.NetworkInbound || config.NetworkInbound
+			newConfig.NetworkOutbound = newConfig.NetworkOutbound && config.NetworkOutbound
+			newConfig.NetworkInbound = newConfig.NetworkInbound && config.NetworkInbound
 		}
 	}
 	return newConfig

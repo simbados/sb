@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,9 +9,18 @@ import (
 	"path/filepath"
 )
 
+type SbConfig struct {
+	Read            []string `json:"read"`
+	Write           []string `json:"write"`
+	ReadWrite       []string `json:"read-write"`
+	Process         []string `json:"process"`
+	NetworkOutbound bool     `json:"net-out"`
+	NetworkInbound  bool     `json:"net-in"`
+}
+
 type Config struct {
 	BinaryPath    string    `json:"binary-path"`
-	BinaryDirPath string    `json:"binary-path"`
+	BinaryDirPath string    `json:"binary-dir-path"`
 	BinaryName    string    `json:"binary-name"`
 	SbConfig      *SbConfig `json:"root-config"`
 	Commands      []string  `json:"commands"`
@@ -44,8 +54,8 @@ var CliOptions = CliOptionsStr{
 	CreateExeEnabled: false,
 }
 
-const configRepo = "/.sb-conf"
-const localConfigPath = "/.sb.conf"
+const configRepo = "/.sb-config"
+const localConfigPath = "/.sb-config"
 
 var validCliOptions = map[string]string{
 	"--debug":      "--debug",
@@ -91,12 +101,34 @@ func main() {
 	setConfigParams(&context, input)
 
 	// parse config files
-	parseConfigFiles(&context)
+	if context.Config.CliConfig == nil {
+		context.Config.SbConfig = parseConfigFiles(&context)
+	} else {
+		logInfo("Using cli options")
+		context.Config.SbConfig = context.Config.CliConfig
+	}
 
 	// build sandbox profile
-	buildSandboxProfile(&context)
+	profile := buildSandboxProfile(&context)
 
-	logInfo(prettyJson(context))
+	logInfo(prettyJson(&context))
+
+	// Run the sandbox
+	args := append(append(append(append([]string{}, "-p"), profile), context.Config.BinaryName), context.Config.Commands...)
+	cmd := exec.Command("sandbox-exec", args...)
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error:", err)
+		fmt.Printf("stderr: %s\n", stderrBuf.String())
+	}
+
+	// Output the captured stdout and stderr
+	fmt.Printf("%s", stdoutBuf.String())
+
 }
 
 func setConfigParams(context *Context, args []string) {
@@ -164,13 +196,4 @@ func getWorkingDir() string {
 		os.Exit(1)
 	}
 	return currentDir
-}
-
-type SbConfig struct {
-	Read            []string `json:"read"`
-	Write           []string `json:"write"`
-	ReadWrite       []string `json:"read-write"`
-	Process         []string `json:"process"`
-	NetworkOutbound bool     `json:"net-out"`
-	NetworkInbound  bool     `json:"net-in"`
 }
