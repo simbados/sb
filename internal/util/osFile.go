@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func doesPathExist(filePath string) (bool, string) {
+func DoesPathExist(filePath string) (bool, string) {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
 		return false, "File or directory does not exist"
@@ -17,16 +17,16 @@ func doesPathExist(filePath string) (bool, string) {
 	}
 }
 
-func parseJson(path string) map[string]interface{} {
+func ParseJson(path string) map[string]interface{} {
 	fileContent, err := os.ReadFile(path)
 	if err != nil {
-		logErr("Error while reading file at path: ", path)
+		LogErr("Error while reading file at path: ", path)
 		os.Exit(1)
 	}
 	var jsonFile map[string]interface{}
 
 	if err := json.Unmarshal(fileContent, &jsonFile); err != nil {
-		logErr("Error while parsing json file at path: ", path, err)
+		LogErr("Error while parsing json file at path: ", path, err)
 		os.Exit(1)
 	}
 	return jsonFile

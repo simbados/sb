@@ -1,11 +1,11 @@
-package main
+package util
 
 import (
 	"fmt"
 	"os"
 )
 
-func printHelp() {
+func PrintHelp() {
 	fmt.Printf(
 		"Welcome to the sandbox cli tool - short sb \n" +
 			"The cli options are the following: \n" +
@@ -18,7 +18,7 @@ func printHelp() {
 	os.Exit(0)
 }
 
-func showVersion() {
+func ShowVersion() {
 	// TODO print version
 	fmt.Printf("Not implemented, try later versions\n")
 	os.Exit(0)

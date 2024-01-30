@@ -1,47 +1,47 @@
-package main
+package util
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sb/internal/types"
 )
 
 const (
 	ColorRed    = "\033[38;5;1;1m"
 	ColorOrange = "\033[38;5;202;1m"
-	ColorYellow = "\033[38;5;11;1m"
 	ColorReset  = "\033[0m"
 )
 
-func logErr(args ...any) {
+func LogErr(args ...any) {
 	fmt.Print(ColorRed)
 	fmt.Println(args...)
 	fmt.Print(ColorReset)
 	os.Exit(1)
 }
 
-func logWarn(args ...any) {
-	if CliOptions.DebugEnabled {
+func LogWarn(args ...any) {
+	if types.CliOptions.DebugEnabled {
 		fmt.Print(ColorOrange)
-		fmt.Println(args)
+		fmt.Println(args...)
 		fmt.Print(ColorReset)
 	}
 }
 
-func logInfo(args ...any) {
-	if CliOptions.DebugEnabled {
-		fmt.Println(args)
+func LogInfo(args ...any) {
+	if types.CliOptions.DebugEnabled {
+		fmt.Println(args...)
 	}
 }
 
 func logDev(args ...any) {
-	fmt.Println(args)
+	fmt.Println(args...)
 }
 
-func prettyJson(context *Context) string {
+func PrettyJson(context *types.Context) string {
 	prettyJson, err := json.MarshalIndent(context, "", "    ")
 	if err != nil {
-		logErr("Some error while pretty printing json", err)
+		LogErr("Some error while pretty printing json", err)
 		return ""
 	}
 	return string(prettyJson)
