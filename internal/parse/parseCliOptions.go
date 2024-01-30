@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"regexp"
 	"sb/internal/types"
 	"sb/internal/util"
@@ -32,7 +31,6 @@ func ParseOptions(paths *types.Paths, args []string) ([]string, *types.SbConfig,
 	optionsUntilIndex := 0
 	hasCliConfig := false
 	for index, value := range args {
-		fmt.Println("value", value)
 		if re.MatchString(value) {
 			split, splitValue := parseCliConfigParam(value)
 			if _, exist := types.ValidCliOptions[split]; exist {

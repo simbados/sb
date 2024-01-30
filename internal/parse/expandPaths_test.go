@@ -20,7 +20,7 @@ func TestExpandPath(t *testing.T) {
 		{"/Users/test/*.js", "(regex #\"/Users/test/^[^\\/]*\\.js\")"},
 	}
 
-	paths := types.Paths{LocalConfigPath: "Users/test/sb", HomePath: "/Users/test", RootConfigPath: "Users/test", WorkingDir: "/Users/test/sb", BinPath: "/usr/bin", TargetBinPath: "/usr/bin/ls"}
+	paths := types.Paths{LocalConfigPath: "Users/test/sb", HomePath: "/Users/test", RootConfigPath: "Users/test", WorkingDir: "/Users/test/sb", BinPath: "/usr/bin", BinaryPath: "/usr/bin/ls"}
 	for _, tt := range tests {
 		res := expandPaths(&paths, tt.a)
 		if res != tt.expected {

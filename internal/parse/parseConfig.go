@@ -2,7 +2,6 @@ package parse
 
 import (
 	"fmt"
-	"os"
 	"sb/internal/types"
 	"sb/internal/util"
 	"strings"
@@ -10,7 +9,6 @@ import (
 
 func doesRootConfigDirExist(path string) bool {
 	isRootConfigExisting, err := util.DoesPathExist(path)
-	fmt.Println("is existing", isRootConfigExisting, path)
 	if !isRootConfigExisting {
 		util.LogWarn("Root config directory does not exist", err)
 		// TODO: this could be on first run we might want to make sure it exists at this point
@@ -57,7 +55,6 @@ func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *
 	configJson := util.ParseJson(path)
 	for key, val := range configJson {
 		for _, command := range commands {
-			fmt.Println(strings.Contains(command, key))
 			if strings.Contains(command, key) {
 				if val == nil {
 					util.LogInfo(fmt.Sprintf("No config found for key: %v in path %v", key, path))
@@ -74,23 +71,8 @@ func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *
 	if len(configs) == 0 {
 		util.LogErr(fmt.Sprintf("You have a config file at path %v, but no keys were found", path))
 	}
-	fmt.Println(configs[0].Read)
 	return mergeConfig(configs...)
 }
-
-//func parseRootCommandConfig(paths *Paths, path string, command string) *SbConfig {
-//	configJson := parseJson(path)
-//	conf := configJson[command]
-//	if conf == nil {
-//		logWarn("No root config for argument found: ", command)
-//		return &SbConfig{}
-//	}
-//	permissions, err := parseNextJsonLevel(conf)
-//	if err {
-//		logErr("Malformed root config json, please check your config at path: ", path)
-//	}
-//	return parseConfigIntoStruct(paths, permissions, path)
-//}
 
 func parseNextJsonLevel(config interface{}) (map[string]interface{}, bool) {
 	rootConf, ok := config.(map[string]interface{})
@@ -102,8 +84,7 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 	for key := range binaryConfig {
 		_, exists := types.AllowedConfigKeys[key]
 		if !exists {
-			fmt.Printf("Found unsupported key in your binary config, please remove this key: %s at path %s\n", key, path)
-			os.Exit(1)
+			util.LogErr(fmt.Sprintf("Found unsupported key in your binary config, please remove this key: %s at path %s\n", key, path))
 		}
 	}
 	read, readExists := binaryConfig["read"].([]interface{})
@@ -112,7 +93,6 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 	process, processExists := binaryConfig["process"].([]interface{})
 	netOut, netOutExists := binaryConfig["net-out"].(bool)
 	netIn, netInExists := binaryConfig["net-in"].(bool)
-	fmt.Println(read, readExists, binaryConfig["read"])
 	if readExists {
 		sbConfig.Read = convertJsonArrayToStringArray(paths, read)
 	}

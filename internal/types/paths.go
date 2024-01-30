@@ -6,5 +6,5 @@ type Paths struct {
 	WorkingDir      string `json:"working-dir"`
 	LocalConfigPath string `json:"local-config-path"`
 	BinPath         string `json:"bin-path"`
-	TargetBinPath   string `json:"target-bin-path"`
+	BinaryPath      string `json:"binary-path"`
 }

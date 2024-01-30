@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"path/filepath"
 	"sb/internal/parse"
 	"sb/internal/sandbox"
 	"sb/internal/types"
@@ -45,8 +44,7 @@ func main() {
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error:", err)
-		fmt.Printf("stderr: %s\n", stderrBuf.String())
+		util.LogErr(fmt.Sprintf("Error: %v \nstderr: %s", err, stderrBuf.String()))
 	}
 
 	// Output the captured stdout and stderr
@@ -60,14 +58,9 @@ func setConfigParams(context *types.Context, args []string) {
 	if len(cliOptions) != 0 {
 		context.Config.CliOptions = cliOptions
 	}
-	context.Config.BinaryPath = getPathToExecutable(commands[0])
-	context.Config.BinaryDirPath = getDirForPath(context.Config.BinaryPath)
+	context.Paths.BinaryPath = getPathToExecutable(commands[0])
 	context.Config.BinaryName = commands[0]
 	context.Config.Commands = commands[1:]
-}
-
-func getDirForPath(path string) string {
-	return filepath.Dir(path)
 }
 
 func getPathToExecutable(executableName string) string {
