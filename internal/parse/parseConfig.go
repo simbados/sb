@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sb/internal/types"
 	"sb/internal/util"
+	"slices"
 	"strings"
 )
 
@@ -18,14 +19,36 @@ func doesRootConfigDirExist(path string) bool {
 	return true
 }
 
-// Here we only parse the config files, cli configs have already been parsed
-func ParseConfigFiles(context *types.Context) *types.SbConfig {
+func getSubdirectories(path string, homePath string) []string {
+	var allPaths []string
+	currentPath := ""
+	paths := strings.Split(path, "/")
+	for _, singlePath := range paths[1:] {
+		currentPath += "/" + singlePath
+		// We just go as high as the home directory
+		if !strings.Contains(homePath, currentPath) {
+			allPaths = append(allPaths, currentPath)
+		}
+	}
+	slices.Reverse(allPaths)
+	return allPaths
+}
+
+// ConfigFileParsing Here we only parse the config files, cli configs have already been parsed
+func ConfigFileParsing(context *types.Context) *types.SbConfig {
 	globalConfig := &types.SbConfig{}
-	localConfigPath := context.Paths.LocalConfigPath + "/" + context.Config.BinaryName + ".json"
-	localConfigExists, _ := util.DoesPathExist(localConfigPath)
-	localConfig := &types.SbConfig{}
+	allLocalPath := getSubdirectories(context.Paths.WorkingDir, context.Paths.HomePath)
+	var localConfigExists bool
+	var localConfigPath string
+	for _, localPath := range allLocalPath {
+		localConfigPath = localPath + types.LocalConfigPath + "/" + context.Config.BinaryName + ".json"
+		localConfigExists, _ = util.DoesPathExist(localConfigPath)
+		if localConfigExists {
+			break
+		}
+	}
 	if localConfigExists {
-		localConfig = parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
+		localConfig := parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
 		util.LogInfo("Using local config file")
 		return localConfig
 	} else {

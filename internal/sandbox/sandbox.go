@@ -95,7 +95,6 @@ func process(config *types.SbConfig, profile string) string {
 }
 
 func write(config *types.SbConfig, profile string) string {
-	fmt.Println(config)
 	if config.Write != nil && len(config.Write) > 0 {
 		allPaths := ""
 		for _, write := range config.Write {

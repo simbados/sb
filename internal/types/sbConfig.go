@@ -10,14 +10,15 @@ type SbConfig struct {
 }
 
 var AllowedConfigKeys = map[string]string{
-	"process":   "process",
-	"write":     "write",
-	"read":      "read",
-	"net-in":    "net-in",
-	"net-out":   "net-out",
-	"--process": "--process",
-	"--write":   "--write",
-	"--read":    "--read",
-	"--net-in":  "--net-in",
-	"--net-out": "--net-out",
+	"process":    "process",
+	"write":      "write",
+	"read":       "read",
+	"read-write": "read-write",
+	"net-in":     "net-in",
+	"net-out":    "net-out",
+	"--process":  "--process",
+	"--write":    "--write",
+	"--read":     "--read",
+	"--net-in":   "--net-in",
+	"--net-out":  "--net-out",
 }

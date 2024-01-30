@@ -1,9 +1,0 @@
-{
-	"__root-config__": {
-		"read": ["~/whatup"],
-		"write": ["~/what"],
-		"process": ["**/yolo/what.ts"],
-		"net-out": true,
-		"net-in": true
-	}
-}

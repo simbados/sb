@@ -24,12 +24,12 @@ func setOption(option string) {
 	}
 }
 
-func ParseOptions(paths *types.Paths, args []string) ([]string, *types.SbConfig, []string) {
+func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfig, []string) {
 	var options []string
-	var cliConfig types.SbConfig
+	var cliConfigSb types.SbConfig
+	var cliConfig *types.SbConfig = nil
 	re := regexp.MustCompile("^-.*")
 	optionsUntilIndex := 0
-	hasCliConfig := false
 	for index, value := range args {
 		if re.MatchString(value) {
 			split, splitValue := parseCliConfigParam(value)
@@ -37,8 +37,14 @@ func ParseOptions(paths *types.Paths, args []string) ([]string, *types.SbConfig,
 				options = append(options, value)
 				setOption(value)
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
-				addToConfig(&cliConfig, split, expandPaths(paths, splitValue))
-				hasCliConfig = true
+				cliConfig = &cliConfigSb
+				if splitValue == "true" || splitValue == "false" {
+					addToConfig(cliConfig, split, splitValue)
+				} else if arr := strings.Split(splitValue, ","); len(arr) > 0 {
+					for _, val := range arr {
+						addToConfig(cliConfig, split, expandPaths(paths, val))
+					}
+				}
 			} else {
 				util.LogErr("You passed a wrong cli option: ", value)
 			}
@@ -50,8 +56,8 @@ func ParseOptions(paths *types.Paths, args []string) ([]string, *types.SbConfig,
 	if len(options) == len(args) {
 		util.LogErr("Please specify the program that you want to sandbox")
 	}
-	if hasCliConfig {
-		return options, &cliConfig, args[optionsUntilIndex:]
+	if cliConfig != nil {
+		return options, cliConfig, args[optionsUntilIndex:]
 	} else {
 		return options, nil, args[optionsUntilIndex:]
 	}

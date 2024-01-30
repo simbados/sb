@@ -24,7 +24,7 @@ func main() {
 
 	// parse config files
 	if context.Config.CliConfig == nil {
-		context.Config.SbConfig = parse.ParseConfigFiles(&context)
+		context.Config.SbConfig = parse.ConfigFileParsing(&context)
 	} else {
 		util.LogInfo("Using cli options")
 		context.Config.SbConfig = context.Config.CliConfig
@@ -53,7 +53,7 @@ func main() {
 }
 
 func setConfigParams(context *types.Context, args []string) {
-	cliOptions, cliConfig, commands := parse.ParseOptions(&context.Paths, args[1:])
+	cliOptions, cliConfig, commands := parse.OptionsParsing(&context.Paths, args[1:])
 	context.Config.CliConfig = cliConfig
 	if len(cliOptions) != 0 {
 		context.Config.CliOptions = cliOptions
