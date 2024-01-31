@@ -1,7 +1,15 @@
 {
 	"__root-config__": {
-		"read": ["**/node_modules/**/*.js", "**/node_modules/**/*.jsx", "**/node_modules/**/*.json", "**/node_modules/**/*.ts", "**/node_modules/**/*.cjs", "**/node_modules/**/*.mjs"],
-		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "../package.json", "../package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**"],
+		"read": [
+			"**/node_modules/**/*.js",
+			"**/node_modules/**/*.jsx",
+			"**/node_modules/**/*.json",
+			"**/node_modules/**/*.ts",
+			"**/node_modules/**/*.cjs",
+			"**/node_modules/**/*.mjs"
+		],
+		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**"],
+		"process": ["[home]/.nvm/**"],
 		"net-out": true,
 		"net-in": true
 	},

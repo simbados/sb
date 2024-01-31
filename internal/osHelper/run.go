@@ -16,5 +16,5 @@ func Run(args []string) {
 	if err != nil {
 		util.LogErr(fmt.Sprintf("Error: %v \nstderr: %s", err, stderrBuf.String()))
 	}
-	util.LogInfoLn(stdoutBuf.String())
+	util.LogInfoSl(stdoutBuf.String())
 }

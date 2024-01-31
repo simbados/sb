@@ -15,10 +15,11 @@ but sb lets you create own configurations for every binary.
 - [ ] Implement init method
   - [x] Adds .sb-config default files
   - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
+  - [x] Add install script to make life easier for installation and adding sb to path
   - [ ] Add sourcing of shell when adding to path
   - [ ] Support multiple shells (fish, zsh, bash, etc)
 - [ ] Flag for creating shim executable for binary
-- [ ] Add install script to make life easier for installation and adding sb to path
+- [ ] Fixing node binary call in npm.json (currently for nvm)
 - [ ] More testing for critical parts of the tool
 - [ ] Sophisticated parsing of config json keys with glob expansion
 - [ ] Glob support of ../ 
