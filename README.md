@@ -13,8 +13,10 @@ but sb lets you create own configurations for every binary.
 
 # TODOs
 - [ ] Implement init method
-  - [ ] Adds .sb-config default files
-  - [ ] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
+  - [x] Adds .sb-config default files
+  - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
+  - [ ] Add sourcing of shell when adding to path
+  - [ ] Support multiple shells (fish, zsh, bash, etc)
 - [ ] Flag for creating shim executable for binary
 - [ ] Add install script to make life easier for installation and adding sb to path
 - [ ] More testing for critical parts of the tool

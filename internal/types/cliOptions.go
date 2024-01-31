@@ -29,4 +29,6 @@ var ValidCliOptions = map[string]string{
 	"-h":           "-h",
 	"--version":    "--version",
 	"-v":           "-v",
+	"--init":       "--init",
+	"-i":           "-i",
 }

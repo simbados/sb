@@ -2,12 +2,13 @@ package parse
 
 import (
 	"regexp"
+	"sb/internal/sandbox"
 	"sb/internal/types"
 	"sb/internal/util"
 	"strings"
 )
 
-func setOption(option string) {
+func setOption(paths *types.Paths, option string) {
 	currentOption := types.ValidCliOptions[option]
 	if currentOption == "--debug" || currentOption == "-d" {
 		types.CliOptions.DebugEnabled = true
@@ -21,6 +22,8 @@ func setOption(option string) {
 		util.PrintHelp()
 	} else if currentOption == "--version" || currentOption == "-v" {
 		util.ShowVersion()
+	} else if currentOption == "--init" || currentOption == "-i" {
+		sandbox.Init(paths)
 	}
 }
 
@@ -35,7 +38,7 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 			split, splitValue := parseCliConfigParam(value)
 			if _, exist := types.ValidCliOptions[split]; exist {
 				options = append(options, value)
-				setOption(value)
+				setOption(paths, value)
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
 				cliConfig = &cliConfigSb
 				if splitValue == "true" || splitValue == "false" {

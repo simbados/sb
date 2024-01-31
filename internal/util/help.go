@@ -17,9 +17,3 @@ func PrintHelp() {
 			"--version -v		Show which version of sb is installed\n")
 	os.Exit(0)
 }
-
-func ShowVersion() {
-	// TODO print version
-	fmt.Printf("Not implemented, try later versions\n")
-	os.Exit(0)
-}

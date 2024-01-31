@@ -49,11 +49,11 @@ func ConfigFileParsing(context *types.Context) *types.SbConfig {
 	}
 	if localConfigExists {
 		localConfig := parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
-		util.LogInfo("Using local config file")
+		util.LogDebug("Using local config file")
 		return localConfig
 	} else {
-		util.LogInfo("No local config file found at: ", localConfigPath)
-		util.LogInfo("Proceeding without local config")
+		util.LogDebug("No local config file found at: ", localConfigPath)
+		util.LogDebug("Proceeding without local config")
 	}
 	if doesRootConfigDirExist(context.Paths.RootConfigPath) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
@@ -62,12 +62,12 @@ func ConfigFileParsing(context *types.Context) *types.SbConfig {
 			util.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
 			globalConfig = parseRootBinaryConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
-			util.LogInfo("Using global config file")
+			util.LogDebug("Using global config file")
 			return globalConfig
 		}
 	} else {
-		util.LogInfo("No root config file found at: ", context.Paths.RootConfigPath)
-		util.LogInfo("Proceeding without global config")
+		util.LogDebug("No root config file found at: ", context.Paths.RootConfigPath)
+		util.LogDebug("Proceeding without global config")
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *
 		for _, command := range commands {
 			if strings.Contains(command, key) {
 				if val == nil {
-					util.LogInfo(fmt.Sprintf("No config found for key: %v in path %v", key, path))
+					util.LogDebug(fmt.Sprintf("No config found for key: %v in path %v", key, path))
 				} else {
 					permissions, err := parseNextJsonLevel(val)
 					if err {

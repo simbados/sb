@@ -21,17 +21,23 @@ func LogErr(args ...any) {
 }
 
 func LogWarn(args ...any) {
+	fmt.Print(ColorOrange)
+	fmt.Println(args...)
+	fmt.Print(ColorReset)
+}
+
+func LogDebug(args ...any) {
 	if types.CliOptions.DebugEnabled {
-		fmt.Print(ColorOrange)
 		fmt.Println(args...)
-		fmt.Print(ColorReset)
 	}
 }
 
-func LogInfo(args ...any) {
-	if types.CliOptions.DebugEnabled {
-		fmt.Println(args...)
-	}
+func LogInfoLn(args ...any) {
+	fmt.Println(args...)
+}
+
+func LogInfoSl(args ...any) {
+	fmt.Print(args...)
 }
 
 func logDev(args ...any) {

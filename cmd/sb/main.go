@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"os/user"
+	"sb/internal/osHelper"
 	"sb/internal/parse"
 	"sb/internal/sandbox"
 	"sb/internal/types"
@@ -26,30 +26,18 @@ func main() {
 	if context.Config.CliConfig == nil {
 		context.Config.SbConfig = parse.ConfigFileParsing(&context)
 	} else {
-		util.LogInfo("Using cli options")
+		util.LogDebug("Using cli options")
 		context.Config.SbConfig = context.Config.CliConfig
 	}
 
 	// build sandbox profile
 	profile := sandbox.BuildSandboxProfile(&context)
 
-	util.LogInfo(util.PrettyJson(&context))
+	util.LogDebug(util.PrettyJson(&context))
 
 	// Run the sandbox
-	args := append(append(append(append([]string{}, "-p"), profile), context.Config.BinaryName), context.Config.Commands...)
-	cmd := exec.Command("sandbox-exec", args...)
-	var stdoutBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = &stdoutBuf
-	cmd.Stderr = &stderrBuf
-
-	err := cmd.Run()
-	if err != nil {
-		util.LogErr(fmt.Sprintf("Error: %v \nstderr: %s", err, stderrBuf.String()))
-	}
-
-	// Output the captured stdout and stderr
-	fmt.Printf("%s", stdoutBuf.String())
-
+	args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
+	osHelper.Run(args)
 }
 
 func setConfigParams(context *types.Context, args []string) {
@@ -77,6 +65,11 @@ func configAllPath(context *types.Context) {
 	context.Paths.WorkingDir = getWorkingDir()
 	context.Paths.BinPath = "/bin"
 	context.Paths.LocalConfigPath = context.Paths.WorkingDir + types.LocalConfigPath
+	sbBinPath, err := os.Executable()
+	if err != nil {
+		util.LogErr(err)
+	}
+	context.Paths.SbBinaryPath = sbBinPath
 }
 
 func getHomePath() string {
