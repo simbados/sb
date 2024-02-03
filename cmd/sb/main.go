@@ -21,7 +21,6 @@ func main() {
 
 	// set config parameter
 	setConfigParams(&context, input)
-
 	// parse config files
 	if context.Config.CliConfig == nil {
 		context.Config.SbConfig = parse.ConfigFileParsing(&context)
@@ -63,7 +62,7 @@ func configAllPath(context *types.Context) {
 	context.Paths.HomePath = getHomePath()
 	context.Paths.RootConfigPath = context.Paths.HomePath + types.ConfigRepo
 	context.Paths.WorkingDir = getWorkingDir()
-	context.Paths.BinPath = "/bin"
+	context.Paths.BinPath = "/usr/bin"
 	context.Paths.LocalConfigPath = context.Paths.WorkingDir + types.LocalConfigPath
 	sbBinPath, err := os.Executable()
 	if err != nil {

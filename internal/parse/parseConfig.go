@@ -141,7 +141,11 @@ func convertJsonArrayToStringArray(paths *types.Paths, jsonArray []interface{}) 
 	var valueStrings []string
 	for _, value := range jsonArray {
 		if str, ok := value.(string); ok {
-			valueStrings = append(valueStrings, expandPaths(paths, strings.Trim(str, " ")))
+			if path, err := expandPaths(paths, strings.Trim(str, " ")); err == nil {
+				valueStrings = append(valueStrings, path)
+			} else {
+				util.LogErr(err)
+			}
 		} else {
 			util.LogErr("Malformed value in config for following array and value: ", jsonArray, value)
 		}

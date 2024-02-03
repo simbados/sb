@@ -7,7 +7,7 @@
 
 - Generic approach for all binaries, node-safe is purposely build for node/npm/npx/yarn. You can also run other executables with node-safe,  
 but sb lets you create own configurations for every binary.
-- Sb has a root config which can be configured once and then forgotten
+- Sb has a root config which can be configured once and then you can forget about it
 - Node-safe development seems to be stale
 - Sb can accumulate default profiles for binaries and ship them out of the box (requires community effort)
 
@@ -16,7 +16,7 @@ but sb lets you create own configurations for every binary.
   - [x] Adds .sb-config default files
   - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
   - [x] Add install script to make life easier for installation and adding sb to path
-  - [ ] Add sourcing of shell when adding to path
+  - [ ] ~~Add sourcing of shell when adding to path (not possible because not main process in shell)~~
   - [ ] Support multiple shells (fish, zsh, bash, etc)
 - [ ] Flag for creating shim executable for binary
 - [ ] Fixing node binary call in npm.json (currently for nvm)

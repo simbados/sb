@@ -1,6 +1,8 @@
 package parse
 
 import (
+	"errors"
+	"path/filepath"
 	"regexp"
 	"sb/internal/sandbox"
 	"sb/internal/types"
@@ -45,7 +47,11 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 					addToConfig(cliConfig, split, splitValue)
 				} else if arr := strings.Split(splitValue, ","); len(arr) > 0 {
 					for _, val := range arr {
-						addToConfig(cliConfig, split, expandPaths(paths, val))
+						if path, err := expandPaths(paths, val); err == nil {
+							addToConfig(cliConfig, split, path)
+						} else {
+							util.LogErr(err)
+						}
 					}
 				}
 			} else {
@@ -122,14 +128,41 @@ const globSingleRegex = `\*`
 
 const globSingleReplace = `^[^\/]*`
 
-func expandPaths(paths *types.Paths, value string) string {
-	value = strings.ReplaceAll(value, "~", paths.HomePath)
-	value = strings.ReplaceAll(value, "[home]", paths.HomePath)
+func buildSymbolToPathMatching(paths *types.Paths) map[string]string {
+	return map[string]string{
+		"~":        paths.HomePath,
+		"[home]":   paths.HomePath,
+		"[wd]":     paths.WorkingDir,
+		"[bin]":    paths.BinPath,
+		"[target]": paths.BinaryPath,
+	}
+}
+
+func expandPaths(paths *types.Paths, value string) (string, error) {
+	initialPath := value
+	matching := buildSymbolToPathMatching(paths)
+	for key, path := range matching {
+		value = strings.ReplaceAll(value, key, path)
+	}
+	if strings.HasPrefix(value, "../") {
+		value = paths.HomePath + "/" + value
+	}
+	if strings.Contains(value, "../") {
+		splits := strings.Split(value, "/")[1:]
+		for index := 0; index < len(splits); index++ {
+			if splits[index] == ".." {
+				if index+1 > len(splits) || index-1 < 0 {
+					return "", errors.New("Can not resolve path of: " + initialPath + " in one of your config files or cli args")
+				}
+				splits = append(splits[0:index-1], splits[index+1:]...)
+				index = -1
+			}
+		}
+		value = "/" + filepath.Join(splits...)
+	}
 	if strings.HasPrefix(value, "./") {
 		value = strings.ReplaceAll(value, "./", paths.WorkingDir+"/")
 	}
-	value = strings.ReplaceAll(value, "[wd]", paths.WorkingDir)
-	value = strings.ReplaceAll(value, "[bin]", paths.BinPath)
 	if strings.Contains(value, "*") || strings.Contains(value, ".") {
 		value = regexp.MustCompile(dotRegex).ReplaceAllString(value, dotReplace)
 		if val, err := regexp.Compile(globEndRegex); err == nil && val.MatchString(value) {
@@ -143,5 +176,5 @@ func expandPaths(paths *types.Paths, value string) string {
 	} else {
 		value = "(literal \"" + value + "\")"
 	}
-	return value
+	return value, nil
 }
