@@ -2,16 +2,15 @@ package types
 
 type CliOptionsStr struct {
 	DebugEnabled     bool `json:"debug-enabled"`
-	PrintEnabled     bool `json:"print-enabled"`
 	DryRunEnabled    bool `json:"dry-run-enabled"`
 	CreateExeEnabled bool `json:"create-exe-enabled"`
 	HelpEnabled      bool `json:"help"`
 	VersionEnabled   bool `json:"version-enabled"`
+	EditEnabled      bool `json:"edit-enabled"`
 }
 
 var CliOptions = CliOptionsStr{
 	DebugEnabled:     false,
-	PrintEnabled:     false,
 	DryRunEnabled:    false,
 	CreateExeEnabled: false,
 }
@@ -19,9 +18,7 @@ var CliOptions = CliOptionsStr{
 var ValidCliOptions = map[string]string{
 	"--debug":      "--debug",
 	"-d":           "-d",
-	"--print":      "--print",
-	"-p":           "-p",
-	"--dry-run":    "--dry-rin",
+	"--dry-run":    "--dry-run",
 	"-dr":          "-dr",
 	"--create-exe": "--create-exe",
 	"-ce":          "-ce",
@@ -31,4 +28,6 @@ var ValidCliOptions = map[string]string{
 	"-v":           "-v",
 	"--init":       "--init",
 	"-i":           "-i",
+	"--edit":       "--edit",
+	"-e":           "-e",
 }

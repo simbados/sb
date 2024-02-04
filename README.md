@@ -1,19 +1,47 @@
-# Reimplementation of node-safe
+# Reimplementation of node-safe with capability to sandbox every script with custom settings
+- Reimplementation of node-safe (https://github.com/berstend/node-safe) in go
+# Table of Content
+1. [Status](#status)  
+2. [TODOs](#todos)  
+3. [Installation](#installation)  
+4. [Difference to node-safe](#difference-to-node-safe)  
+5. [How does it work](#how-does-it-work)
+6. [Configuration Flags](#configuration-flags)
+7. [FAQs](#faqs)
+
+## Status
 
 - Currently in development
-- Reimplementation of node-safe (https://github.com/berstend/node-safe) in go
+- v0.1.0 coming soon
 
-# Installation
+## TODOs
+- [x] Glob support of ../
+- [x] Add support for opening config files with sb and default editor
+- [x] Implement init method
+  - [x] Adds .sb-config default files
+  - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
+  - [x] Add install script to make life easier for installation and adding sb to path
+  - [x] ~~Add sourcing of shell when adding to path (not possible because not main process in shell)~~
+  - [x] Support multiple shells (fish, zsh, bash, etc)
+- [x] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
+- [ ] Fixing node binary call in npm.json (currently for nvm)
+- [ ] More testing for critical parts of the tool
+- [ ] Sophisticated parsing of config json keys with glob expansion
+- [ ] Add support of adding new config files with sb
+- [ ] Possibility to add overall config json file to apply to all commands
+- [ ] Helper command to show all configs file for a binary and their content
+
+## Installation
 **Building from Source**  
 
 Run ```go build cmd/sb/sb.go && ./sb --init```  
-This will build sb and run the init command which will setup everything for sb
+This will build sb and run the [init](#2-configuration-flags) command which will setup everything for sb
 
 **Prebuild binary**
 
 Coming soon: With the Prebuild binary you can download sb executable directly from github and run the init function
 
-# Difference to node-safe
+## Difference to node-safe
 
 - Generic approach for all binaries, node-safe is purposely build for node/npm/npx/yarn. You can also run other executables with node-safe,  
 but sb lets you create own configurations for every binary.
@@ -21,24 +49,9 @@ but sb lets you create own configurations for every binary.
 - Node-safe development seems to be stale
 - Sb can accumulate default profiles for binaries and ship them out of the box (requires community effort)
 
-# TODOs
-- [x] Implement init method
-  - [x] Adds .sb-config default files
-  - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
-  - [x] Add install script to make life easier for installation and adding sb to path
-  - [ ] ~~Add sourcing of shell when adding to path (not possible because not main process in shell)~~
-  - [x] Support multiple shells (fish, zsh, bash, etc)
-- [ ] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
-- [ ] Fixing node binary call in npm.json (currently for nvm)
-- [ ] More testing for critical parts of the tool
-- [ ] Sophisticated parsing of config json keys with glob expansion
-- [x] Glob support of ../ 
-- [ ] Add support for opening config files with sb and default editor
-- [ ] Possibility to add overall config json file to apply to all commands
-- [ ] Helper command to show all configs file for a binary and their content
 
 
-# 1. General Idea
+## How does it work
 
 There are 3 ways to configure sb  
 None are mandatory, but if you not provide any arguments the program will not be sandboxed  
@@ -70,16 +83,29 @@ profile with `__root-config__` and `install`
 2. Local Config: Sb will look for a .sb-config/ directory in your current directory and subdirectories.  
 So if your current directory is ~/stuff/develop
 Sb will look for .sb-directory in subdirectories up till your home folder.  
-So it will look in /Users/<user>/stuff/.sb-config and /Users/<users>/stuff/.sb-config
+So it will look in /Users/<user>/stuff/.sb-config and /Users/<users>/stuff/.sb-config  
 Uses the same structure as the global config  
 3. Cli options: You can pass the options also as cli flags. More on this in section 3  
 
 **Attention**: If you have both configs for a binary, sb will take the arguments with the highest priority  
-Order of priority: cli arguments > local config > global config
+Order of priority: cli arguments > local config > global config  
 E.g. You deny net-inbound on the global config, but your local config allows it, then it will be allowed  
 
+## Configuration flags
 
-# FAQS
+Run sb --help for all available flags  
+- --debug (-d):  Show sandbox profile and debug information (will run the command)  
+- --dry-run (-dr): Do not run sandbox just show debug information  
+- --version (-v):  Show version  
+- --init (-i): Will initialize sb. Add root configuration files and move sb to config binary location
+- --edit (-e): Edit config files with your default editor (standard vim)   
+Takes two additional arguments first must be either local/root and second name of binary you would like to edit
+E.g. ```sb -e root npm``` (edits the npm.json file in the root directory)  
+E.g. ```sb -e local npm``` (edits the npm.json file in the local directory)  
+Does currently not support creating new config files, is on the TODO list :)
+
+
+## FAQS
 1. But sandbox-exec is deprecated and usage is discouraged  
 A: Yes that is true, but most browsers rely on sandbox-exec and v1 sandbox profiles still work.  
 There is currently no other way to sandbox scripts or cli tools.

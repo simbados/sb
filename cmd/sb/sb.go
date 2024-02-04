@@ -34,7 +34,7 @@ func main() {
 
 	util.LogDebug(util.PrettyJson(&context))
 
-	if !types.CliOptions.DebugEnabled {
+	if !types.CliOptions.DryRunEnabled {
 		// Run the sandbox
 		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
 		osHelper.Run(args)
@@ -43,6 +43,9 @@ func main() {
 
 func setConfigParams(context *types.Context, args []string) {
 	cliOptions, cliConfig, commands := parse.OptionsParsing(&context.Paths, args[1:])
+	if types.CliOptions.EditEnabled {
+		util.EditFile(commands, context.Paths)
+	}
 	context.Config.CliConfig = cliConfig
 	if len(cliOptions) != 0 {
 		context.Config.CliOptions = cliOptions

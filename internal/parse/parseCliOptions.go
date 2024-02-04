@@ -10,14 +10,13 @@ import (
 	"strings"
 )
 
-func setOption(paths *types.Paths, option string) {
+func parseCliOptions(paths *types.Paths, option string) {
 	currentOption := types.ValidCliOptions[option]
 	if currentOption == "--debug" || currentOption == "-d" {
 		types.CliOptions.DebugEnabled = true
-	} else if currentOption == "--print" || currentOption == "-p" {
-		types.CliOptions.PrintEnabled = true
 	} else if currentOption == "--dry-run" || currentOption == "-dr" {
 		types.CliOptions.DryRunEnabled = true
+		types.CliOptions.DebugEnabled = true
 	} else if currentOption == "--create-exe" || currentOption == "-ce" {
 		types.CliOptions.CreateExeEnabled = true
 	} else if currentOption == "--help" || currentOption == "-h" {
@@ -26,6 +25,8 @@ func setOption(paths *types.Paths, option string) {
 		util.ShowVersion()
 	} else if currentOption == "--init" || currentOption == "-i" {
 		sandbox.Init(paths)
+	} else if currentOption == "--edit" || currentOption == "-e" {
+		types.CliOptions.EditEnabled = true
 	}
 }
 
@@ -40,7 +41,7 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 			split, splitValue := parseCliConfigParam(value)
 			if _, exist := types.ValidCliOptions[split]; exist {
 				options = append(options, value)
-				setOption(paths, value)
+				parseCliOptions(paths, value)
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
 				cliConfig = &cliConfigSb
 				if splitValue == "true" || splitValue == "false" {
