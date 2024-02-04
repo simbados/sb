@@ -30,6 +30,7 @@
 - [ ] Add support of adding new config files with sb
 - [ ] Possibility to add overall config json file to apply to all commands
 - [ ] Helper command to show all configs file for a binary and their content
+- [ ] Add TLDR;
 
 ## Installation
 **Building from Source**  
@@ -49,18 +50,16 @@ but sb lets you create own configurations for every binary.
 - Node-safe development seems to be stale
 - Sb can accumulate default profiles for binaries and ship them out of the box (requires community effort)
 
-
-
 ## How does it work
 
 There are 3 ways to configure sb  
-None are mandatory, but if you not provide any arguments the program will not be sandboxed  
+None are mandatory, but if you do not provide any arguments the program will have nearly no permissions
 
 1. Global Config: If you have a stuff that should always be applied to your config,
-you should put it into $HOME/.sb-config/<name-of-your-binary>.json  
-Inside .sb-config you will have json files which are named after the binary, e.g:  
-npm.json  
-ls.json  
+you should put it into $HOME/.sb-config/\<name-of-your-binary\>.json with the structure:  
+\> .sbconfig  
+&emsp; \> npm.json  
+&emsp; \> ls.json  
 Now the structure of one such json file is as followed (npm.json): 
 ```
 {
@@ -81,13 +80,19 @@ Now the structure of one such json file is as followed (npm.json):
 `__root-config__` will be applied for all commands of a binary, e.g. npm install will trigger building of a sandbox  
 profile with `__root-config__` and `install`
 2. Local Config: Sb will look for a .sb-config/ directory in your current directory and subdirectories.  
-So if your current directory is ~/stuff/develop
+So if your current directory is ~/stuff/develop  
 Sb will look for .sb-directory in subdirectories up till your home folder.  
-So it will look in /Users/<user>/stuff/.sb-config and /Users/<users>/stuff/.sb-config  
+So it will look in /Users/\<user\>/stuff/.sb-config and /Users/\<users\>/.sb-config  
 Uses the same structure as the global config  
-3. Cli options: You can pass the options also as cli flags. More on this in section 3  
+3. Cli options: You can pass the options also as cli flags  
+E.g. 
+- ```sb --read="[wd]/**" ls -a```
+- ```sb --read="[wd]/**,~/what/yes" ls -a```
 
-**Attention**: If you have both configs for a binary, sb will take the arguments with the highest priority  
+**The config files need arrays for read/write/read-write/process, the cli config expects a string
+which is comma seperated!**
+
+**Attention**: If you have multiple configs for a binary, sb will take the arguments with the highest priority  
 Order of priority: cli arguments > local config > global config  
 E.g. You deny net-inbound on the global config, but your local config allows it, then it will be allowed  
 
