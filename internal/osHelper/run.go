@@ -1,20 +1,18 @@
 package osHelper
 
 import (
-	"bytes"
-	"fmt"
+	"os"
 	"os/exec"
-	"sb/internal/util"
 )
 
 func Run(args []string) {
 	cmd := exec.Command(args[0], args[1:]...)
-	var stdoutBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = &stdoutBuf
-	cmd.Stderr = &stderrBuf
-	err := cmd.Run()
-	if err != nil {
-		util.LogErr(fmt.Sprintf("Error: %v \nstderr: %s", err, stderrBuf.String()))
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		panic(err)
 	}
-	util.LogInfoSl(stdoutBuf.String())
+	if err := cmd.Wait(); err != nil {
+		panic(err)
+	}
 }

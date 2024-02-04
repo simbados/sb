@@ -3,6 +3,16 @@
 - Currently in development
 - Reimplementation of node-safe (https://github.com/berstend/node-safe) in go
 
+# Installation
+**Building from Source**  
+
+Run ```go build cmd/sb/sb.go && ./sb --init```  
+This will build sb and run the init command which will setup everything for sb
+
+**Prebuild binary**
+
+Coming soon: With the Prebuild binary you can download sb executable directly from github and run the init function
+
 # Difference to node-safe
 
 - Generic approach for all binaries, node-safe is purposely build for node/npm/npx/yarn. You can also run other executables with node-safe,  
@@ -12,17 +22,20 @@ but sb lets you create own configurations for every binary.
 - Sb can accumulate default profiles for binaries and ship them out of the box (requires community effort)
 
 # TODOs
-- [ ] Implement init method
+- [x] Implement init method
   - [x] Adds .sb-config default files
   - [x] Add default.sb to .sb-config root repo so that user can adjust default sandbox profile if needed
   - [x] Add install script to make life easier for installation and adding sb to path
   - [ ] ~~Add sourcing of shell when adding to path (not possible because not main process in shell)~~
-  - [ ] Support multiple shells (fish, zsh, bash, etc)
-- [ ] Flag for creating shim executable for binary
+  - [x] Support multiple shells (fish, zsh, bash, etc)
+- [ ] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
 - [ ] Fixing node binary call in npm.json (currently for nvm)
 - [ ] More testing for critical parts of the tool
 - [ ] Sophisticated parsing of config json keys with glob expansion
-- [ ] Glob support of ../ 
+- [x] Glob support of ../ 
+- [ ] Add support for opening config files with sb and default editor
+- [ ] Possibility to add overall config json file to apply to all commands
+- [ ] Helper command to show all configs file for a binary and their content
 
 
 # 1. General Idea

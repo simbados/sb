@@ -15,7 +15,8 @@ type LoggerType interface {
 	LogDebug(args ...any)
 	LogInfoLn(args ...any)
 	LogInfoSl(args ...any)
-	PrettyJson(context *types.Context) string
+	LogHighlight(args ...any)
+	PrettyJson(toPretty any) string
 }
 
 type ImplLogger struct{}
@@ -25,6 +26,12 @@ func (il ImplLogger) LogErr(args ...any) {
 	fmt.Println(args...)
 	fmt.Print(ColorReset)
 	os.Exit(1)
+}
+
+func (il ImplLogger) LogHighlight(args ...any) {
+	fmt.Print(ColorGreen)
+	fmt.Println(args...)
+	fmt.Print(ColorReset)
 }
 
 func (il ImplLogger) LogWarn(args ...any) {
@@ -47,8 +54,8 @@ func (il ImplLogger) LogInfoSl(args ...any) {
 	fmt.Print(args...)
 }
 
-func (il ImplLogger) PrettyJson(context *types.Context) string {
-	prettyJson, err := json.MarshalIndent(context, "", "    ")
+func (il ImplLogger) PrettyJson(toPretty any) string {
+	prettyJson, err := json.MarshalIndent(toPretty, "", "    ")
 	if err != nil {
 		LogErr("Some error while pretty printing json", err)
 		return ""
@@ -58,12 +65,17 @@ func (il ImplLogger) PrettyJson(context *types.Context) string {
 
 const (
 	ColorRed    = "\033[38;5;1;1m"
+	ColorGreen  = "\033[38;5;35;1m"
 	ColorOrange = "\033[38;5;202;1m"
 	ColorReset  = "\033[0m"
 )
 
 func LogErr(args ...any) {
 	Logger.LogErr(args...)
+}
+
+func LogHighlight(args ...any) {
+	Logger.LogHighlight(args...)
 }
 
 func LogWarn(args ...any) {
@@ -82,6 +94,6 @@ func LogInfoSl(args ...any) {
 	Logger.LogInfoSl(args...)
 }
 
-func PrettyJson(context *types.Context) string {
-	return Logger.PrettyJson(context)
+func PrettyJson(toPretty any) string {
+	return Logger.PrettyJson(toPretty)
 }

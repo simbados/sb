@@ -34,9 +34,11 @@ func main() {
 
 	util.LogDebug(util.PrettyJson(&context))
 
-	// Run the sandbox
-	args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
-	osHelper.Run(args)
+	if !types.CliOptions.DebugEnabled {
+		// Run the sandbox
+		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
+		osHelper.Run(args)
+	}
 }
 
 func setConfigParams(context *types.Context, args []string) {

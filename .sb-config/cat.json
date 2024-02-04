@@ -1,5 +1,5 @@
 {
   "__root-config__": {
-    "read": ["[home]/**"]
+    "read-write": ["[home]/test/**"]
   }
 }

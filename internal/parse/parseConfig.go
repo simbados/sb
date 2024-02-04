@@ -87,6 +87,7 @@ func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *
 						util.LogErr("Malformed root config json, please check your config at path: ", path)
 					}
 					configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
+					util.PrettyJson(configs)
 				}
 			}
 		}
@@ -162,8 +163,8 @@ func mergeConfig(configToMerge ...*types.SbConfig) *types.SbConfig {
 			newConfig.Process = appendUniqueStrings(newConfig.Process, config.Process...)
 			newConfig.ReadWrite = appendUniqueStrings(newConfig.ReadWrite, config.ReadWrite...)
 			// Network in/out-bound can not really be merged if it is prohibited once it should be enforced
-			newConfig.NetworkOutbound = newConfig.NetworkOutbound && config.NetworkOutbound
-			newConfig.NetworkInbound = newConfig.NetworkInbound && config.NetworkInbound
+			newConfig.NetworkOutbound = newConfig.NetworkOutbound || config.NetworkOutbound
+			newConfig.NetworkInbound = newConfig.NetworkInbound || config.NetworkInbound
 		}
 	}
 	return newConfig

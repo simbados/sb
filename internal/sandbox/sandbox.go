@@ -156,6 +156,28 @@ func netOut(config *types.SbConfig, profile string) string {
 (allow network-outbound)
 (allow network-bind)
 (allow system-socket)`
+		profile = addFallBackForCert(config, profile)
+	}
+	return profile
+}
+
+func addFallBackForCert(config *types.SbConfig, profile string) string {
+	// If we do not allow other process we need some file read for network access
+	if len(config.Process) == 0 {
+		profile += `
+(allow file-read*
+  (regex #"^/Users/[^.]+/Library/Preferences/(.*).plist")
+  (regex #"^/Library/Preferences/(.*).plist")
+  (literal "/Library")
+  (subpath "/dev")
+  (subpath "/private/var") ; critical for certs, /private/var/select/sh and the like
+  (subpath "/private/etc") ; openssl.cnf and the like
+)
+
+(allow file-write*
+  (subpath "/dev")
+)
+`
 	}
 	return profile
 }
@@ -170,6 +192,7 @@ func netIn(config *types.SbConfig, profile string) string {
 (allow system-socket)
 (allow file-read* (literal "/private/var/run/resolv.conf"))
 `
+		profile = addFallBackForCert(config, profile)
 	}
 	return profile
 }
