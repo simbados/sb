@@ -3,6 +3,7 @@ package osHelper
 import (
 	"os"
 	"os/exec"
+	"sb/internal/log"
 )
 
 func Run(args []string) {
@@ -11,9 +12,9 @@ func Run(args []string) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	if err := cmd.Start(); err != nil {
-		panic(err)
+		log.LogErr(err)
 	}
 	if err := cmd.Wait(); err != nil {
-		panic(err)
+		log.LogErr(err)
 	}
 }

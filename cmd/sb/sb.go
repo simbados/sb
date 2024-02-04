@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"sb/internal/log"
 	"sb/internal/osHelper"
 	"sb/internal/parse"
 	"sb/internal/sandbox"
@@ -25,14 +26,14 @@ func main() {
 	if context.Config.CliConfig == nil {
 		context.Config.SbConfig = parse.ConfigFileParsing(&context)
 	} else {
-		util.LogDebug("Using cli options")
+		log.LogDebug("Using cli options")
 		context.Config.SbConfig = context.Config.CliConfig
 	}
 
 	// build sandbox profile
 	profile := sandbox.BuildSandboxProfile(&context)
 
-	util.LogDebug(util.PrettyJson(&context))
+	log.LogDebug(log.PrettyJson(&context))
 
 	if !types.CliOptions.DryRunEnabled {
 		// Run the sandbox
@@ -58,7 +59,7 @@ func setConfigParams(context *types.Context, args []string) {
 func getPathToExecutable(executableName string) string {
 	cmd, err := exec.LookPath(executableName)
 	if err != nil {
-		util.LogErr(executableName + " binary does not exists\n")
+		log.LogErr(executableName + " binary does not exists\n")
 	}
 	return cmd
 }
@@ -71,7 +72,7 @@ func configAllPath(context *types.Context) {
 	context.Paths.LocalConfigPath = context.Paths.WorkingDir + types.LocalConfigPath
 	sbBinPath, err := os.Executable()
 	if err != nil {
-		util.LogErr(err)
+		log.LogErr(err)
 	}
 	context.Paths.SbBinaryPath = sbBinPath
 }

@@ -9,7 +9,7 @@
 			"**/node_modules/**/*.mjs"
 		],
 		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**"],
-		"process": ["[home]/.nvm/**"],
+		"process": ["[target]/../../**"],
 		"net-out": true,
 		"net-in": true
 	},

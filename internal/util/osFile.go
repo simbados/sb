@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sb/internal/log"
 )
 
 func DoesPathExist(filePath string) (bool, error) {
@@ -21,13 +22,13 @@ func DoesPathExist(filePath string) (bool, error) {
 func ParseJson(path string) map[string]interface{} {
 	fileContent, err := os.ReadFile(path)
 	if err != nil {
-		LogErr("Error while reading file at path: ", path)
+		log.LogErr("Error while reading file at path: ", path)
 		os.Exit(1)
 	}
 	var jsonFile map[string]interface{}
 
 	if err := json.Unmarshal(fileContent, &jsonFile); err != nil {
-		LogErr("Error while parsing json file at path: ", path, err)
+		log.LogErr("Error while parsing json file at path: ", path, err)
 		os.Exit(1)
 	}
 	return jsonFile

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sb/internal/log"
 	"sb/internal/osHelper"
 	"sb/internal/types"
 )
@@ -38,16 +39,16 @@ func EditFile(commands []string, paths types.Paths) {
 		showError()
 	}
 	osHelper.Run([]string{defaultEditor, path})
-	LogHighlight("Successfully edit of file")
+	log.LogHighlight("Successfully edit of file")
 	os.Exit(0)
 }
 
 func showErrorWith(error error) {
-	LogErr(error)
+	log.LogErr(error)
 }
 
 func showError() {
-	LogErr(fmt.Printf(`
+	log.LogErr(fmt.Printf(`
 You must provide two values to edit a configuration file
 Valid options are:
 sb -e local <binary name>

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"path/filepath"
 	"regexp"
+	"sb/internal/log"
 	"sb/internal/sandbox"
 	"sb/internal/types"
 	"sb/internal/util"
@@ -44,7 +45,7 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
 				cliConfig = addToCliConfig(paths, cliConfig, cliConfigSb, splitValue, split)
 			} else {
-				util.LogErr("You passed a wrong cli option: ", value)
+				log.LogErr("You passed a wrong cli option: ", value)
 			}
 		} else {
 			optionsUntilIndex = index
@@ -52,7 +53,7 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 		}
 	}
 	if len(options) == len(args) {
-		util.LogErr("Please specify the program that you want to sandbox")
+		log.LogErr("Please specify the program that you want to sandbox")
 	}
 	if cliConfig != nil {
 		return options, cliConfig, args[optionsUntilIndex:]
@@ -70,7 +71,7 @@ func addToCliConfig(paths *types.Paths, cliConfig *types.SbConfig, cliConfigSb t
 			if path, err := expandPaths(paths, val); err == nil {
 				addToConfig(cliConfig, split, path)
 			} else {
-				util.LogErr(err)
+				log.LogErr(err)
 			}
 		}
 	}
@@ -100,14 +101,14 @@ func addToConfig(config *types.SbConfig, key string, value string) *types.SbConf
 	case "--net-in":
 		boolVal, exists := parseStringBoolean(value)
 		if !exists {
-			util.LogErr("You must provide true or false value for cli config: ", value)
+			log.LogErr("You must provide true or false value for cli config: ", value)
 		}
 		config.NetworkInbound = boolVal
 		break
 	case "--net-out":
 		boolVal, exists := parseStringBoolean(value)
 		if !exists {
-			util.LogErr("You must provide true or false value for cli config: ", value)
+			log.LogErr("You must provide true or false value for cli config: ", value)
 		}
 		config.NetworkOutbound = boolVal
 		break

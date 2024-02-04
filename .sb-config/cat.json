@@ -1,5 +1,0 @@
-{
-  "__root-config__": {
-    "read-write": ["[home]/test/**"]
-  }
-}

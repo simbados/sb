@@ -24,7 +24,7 @@
   - [x] ~~Add sourcing of shell when adding to path (not possible because not main process in shell)~~
   - [x] Support multiple shells (fish, zsh, bash, etc)
 - [x] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
-- [ ] Fixing node binary call in npm.json (currently for nvm)
+- [x] Fixing node binary call in npm.json (currently for nvm)
 - [ ] More testing for critical parts of the tool
 - [ ] Sophisticated parsing of config json keys with glob expansion
 - [ ] Add support of adding new config files with sb

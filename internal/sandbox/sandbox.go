@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sb/internal/log"
 	"sb/internal/types"
-	"sb/internal/util"
 	"strings"
 )
 
@@ -30,7 +30,7 @@ func BuildSandboxProfile(context *types.Context) string {
 		profile = netIn(context.Config.SbConfig, profile)
 		profile = netOut(context.Config.SbConfig, profile)
 	}
-	util.LogDebug(profile)
+	log.LogDebug(profile)
 	return minifyProfile(profile)
 }
 
@@ -216,6 +216,6 @@ func readBaseProfile(path *types.Paths) string {
 
 func handleFileReadError(err error) {
 	if err != nil {
-		util.LogErr("Something went wrong while reading the base profile", err)
+		log.LogErr("Something went wrong while reading the base profile", err)
 	}
 }

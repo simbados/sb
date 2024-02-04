@@ -7,33 +7,34 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sb/internal/log"
 	"sb/internal/types"
 	"sb/internal/util"
 )
 
 func Init(paths *types.Paths) {
 	sbConfigPath := filepath.Join(paths.HomePath, ".sb-config")
-	util.LogHighlight("\nInit of sandbox called\n")
-	util.LogInfoSl(fmt.Sprintf("Do you want to have a root config with default values at %v, (y/n) ", sbConfigPath))
+	log.LogHighlight("\nInit of sandbox called\n")
+	log.LogInfoSl(fmt.Sprintf("Do you want to have a root config with default values at %v, (y/n) ", sbConfigPath))
 	var answer string
 	_, err := fmt.Scanln(&answer)
 	handleError(err, "Sorry your input can not be read, please type y or n \nExiting")
 	if answer == "y" {
 		createSbConfig(sbConfigPath)
 	} else {
-		util.LogWarn("Skipping creating root config directory")
+		log.LogWarn("Skipping creating root config directory")
 	}
-	util.LogInfoSl(fmt.Sprintf("Do you want to move the binary to the root config in %v and add it to your PATH? (y/n) ", sbConfigPath))
+	log.LogInfoSl(fmt.Sprintf("Do you want to move the binary to the root config in %v and add it to your PATH? (y/n) ", sbConfigPath))
 	var moveLocation string
 	_, errMove := fmt.Scanln(&moveLocation)
 	handleError(errMove, "Sorry your input can not be read, please type y or n \nExiting")
 	if moveLocation == "y" {
 		shellConfigPath := moveBinaryAndAddToPath(paths, sbConfigPath)
-		util.LogInfoLn("Please source your shell config, so that you can use sb")
-		util.LogInfoLn("Run \"source " + shellConfigPath + "\"")
+		log.LogInfoLn("Please source your shell config, so that you can use sb")
+		log.LogInfoLn("Run \"source " + shellConfigPath + "\"")
 	} else {
-		util.LogWarn("Skipping moving the binary and adding it to path")
-		util.LogWarn("To use sb you have to add the binary to your path manually")
+		log.LogWarn("Skipping moving the binary and adding it to path")
+		log.LogWarn("To use sb you have to add the binary to your path manually")
 	}
 	os.Exit(0)
 }
@@ -73,7 +74,7 @@ func moveBinaryAndAddToPath(paths *types.Paths, sbConfigPath string) string {
 	handleError(err, "Could not move binary to new location")
 	localShellConfigPath, err := findShellConfigFile(paths)
 	if err != nil {
-		util.LogErr(err)
+		log.LogErr(err)
 	}
 	file, err := os.OpenFile(localShellConfigPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	handleError(err, "Could not open shell configuration file")
@@ -86,7 +87,7 @@ func moveBinaryAndAddToPath(paths *types.Paths, sbConfigPath string) string {
 	if _, err := file.WriteString(fmt.Sprintf("export PATH=$PATH:%v\n", filepath.Join(sbConfigPath, "bin"))); err != nil {
 		handleError(err, "Failed to write to file")
 	}
-	util.LogHighlight(fmt.Sprintf("\nSuccessfully moved sb binary to %v and appended your path with the sb path at %v\n", binaryConfigPath, localShellConfigPath))
+	log.LogHighlight(fmt.Sprintf("\nSuccessfully moved sb binary to %v and appended your path with the sb path at %v\n", binaryConfigPath, localShellConfigPath))
 	return localShellConfigPath
 }
 
@@ -94,19 +95,19 @@ func moveBinaryAndAddToPath(paths *types.Paths, sbConfigPath string) string {
 var configDir embed.FS
 
 func createSbConfig(sbConfigPath string) {
-	util.LogInfoLn("Creating .sb-config...")
+	log.LogInfoLn("Creating .sb-config...")
 	if val, _ := util.DoesPathExist(sbConfigPath); val {
-		util.LogWarn(fmt.Sprintf("There is already an existing config directory at %v \nPlease create a backup or remove it to have the default configuration", sbConfigPath))
+		log.LogWarn(fmt.Sprintf("There is already an existing config directory at %v \nPlease create a backup or remove it to have the default configuration", sbConfigPath))
 	} else {
-		util.LogInfoLn(fmt.Sprintf("Creating directory at destination %v", sbConfigPath))
+		log.LogInfoLn(fmt.Sprintf("Creating directory at destination %v", sbConfigPath))
 		createDir(sbConfigPath)
 		err := fs.WalkDir(configDir, "configDir", func(path string, d fs.DirEntry, err error) error {
 			if err := copyEmbeddedFilesToDestination(sbConfigPath); err != nil {
-				util.LogErr("Failed to extract embedded files")
-				util.LogErr(err)
-				util.LogErr("Please submit an issue in the github repository")
+				log.LogErr("Failed to extract embedded files")
+				log.LogErr(err)
+				log.LogErr("Please submit an issue in the github repository")
 			}
-			util.LogHighlight("\nSb config successfully copied to destination\n")
+			log.LogHighlight("\nSb config successfully copied to destination\n")
 			return nil
 		})
 		handleError(err, "Something went wrong wile copying files")

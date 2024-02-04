@@ -2,6 +2,7 @@ package parse
 
 import (
 	"fmt"
+	"sb/internal/log"
 	"sb/internal/types"
 	"sb/internal/util"
 	"slices"
@@ -11,7 +12,7 @@ import (
 func doesRootConfigDirExist(path string) bool {
 	isRootConfigExisting, err := util.DoesPathExist(path)
 	if !isRootConfigExisting {
-		util.LogWarn("Root config directory does not exist", err)
+		log.LogWarn("Root config directory does not exist", err)
 		// TODO: this could be on first run we might want to make sure it exists at this point
 		// Built first run logic to create default files and directories if non existent
 		return false
@@ -49,25 +50,25 @@ func ConfigFileParsing(context *types.Context) *types.SbConfig {
 	}
 	if localConfigExists {
 		localConfig := parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
-		util.LogDebug("Using local config file")
+		log.LogDebug("Using local config file")
 		return localConfig
 	} else {
-		util.LogDebug("No local config file found at: ", localConfigPath)
-		util.LogDebug("Proceeding without local config")
+		log.LogDebug("No local config file found at: ", localConfigPath)
+		log.LogDebug("Proceeding without local config")
 	}
 	if doesRootConfigDirExist(context.Paths.RootConfigPath) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
 		binaryPathExists, _ := util.DoesPathExist(binaryGlobalConfigPath)
 		if !binaryPathExists {
-			util.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
+			log.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
 			globalConfig = parseRootBinaryConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
-			util.LogDebug("Using global config file")
+			log.LogDebug("Using global config file")
 			return globalConfig
 		}
 	} else {
-		util.LogDebug("No root config file found at: ", context.Paths.RootConfigPath)
-		util.LogDebug("Proceeding without global config")
+		log.LogDebug("No root config file found at: ", context.Paths.RootConfigPath)
+		log.LogDebug("Proceeding without global config")
 	}
 	return nil
 }
@@ -80,20 +81,20 @@ func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *
 		for _, command := range commands {
 			if strings.Contains(command, key) {
 				if val == nil {
-					util.LogDebug(fmt.Sprintf("No config found for key: %v in path %v", key, path))
+					log.LogDebug(fmt.Sprintf("No config found for key: %v in path %v", key, path))
 				} else {
 					permissions, err := parseNextJsonLevel(val)
 					if err {
-						util.LogErr("Malformed root config json, please check your config at path: ", path)
+						log.LogErr("Malformed root config json, please check your config at path: ", path)
 					}
 					configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
-					util.PrettyJson(configs)
+					log.PrettyJson(configs)
 				}
 			}
 		}
 	}
 	if len(configs) == 0 {
-		util.LogErr(fmt.Sprintf("You have a config file at path %v, but no keys were found", path))
+		log.LogErr(fmt.Sprintf("You have a config file at path %v, but no keys were found", path))
 	}
 	return mergeConfig(configs...)
 }
@@ -108,7 +109,7 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 	for key := range binaryConfig {
 		_, exists := types.AllowedConfigKeys[key]
 		if !exists {
-			util.LogErr(fmt.Sprintf("Found unsupported key in your binary config, please remove this key: %s at path %s\n", key, path))
+			log.LogErr(fmt.Sprintf("Found unsupported key in your binary config, please remove this key: %s at path %s\n", key, path))
 		}
 	}
 	read, readExists := binaryConfig["read"].([]interface{})
@@ -145,10 +146,10 @@ func convertJsonArrayToStringArray(paths *types.Paths, jsonArray []interface{}) 
 			if path, err := expandPaths(paths, strings.Trim(str, " ")); err == nil {
 				valueStrings = append(valueStrings, path)
 			} else {
-				util.LogErr(err)
+				log.LogErr(err)
 			}
 		} else {
-			util.LogErr("Malformed value in config for following array and value: ", jsonArray, value)
+			log.LogErr("Malformed value in config for following array and value: ", jsonArray, value)
 		}
 	}
 	return valueStrings
