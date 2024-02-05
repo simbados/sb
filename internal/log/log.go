@@ -74,6 +74,12 @@ func LogErr(args ...any) {
 	Logger.LogErr(args...)
 }
 
+func LogDev(args ...any) {
+	if types.Envs.DevModeEnabled {
+		fmt.Println(args...)
+	}
+}
+
 func LogHighlight(args ...any) {
 	Logger.LogHighlight(args...)
 }

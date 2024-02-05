@@ -74,29 +74,51 @@ func ConfigFileParsing(context *types.Context) *types.SbConfig {
 }
 
 func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *types.SbConfig {
-	commands = append(commands, "__root-config__")
+	mapping := buildCommandMap(commands)
+	mapping["__root-config__"] = true
 	var configs []*types.SbConfig
 	configJson := util.ParseJson(path)
 	for key, val := range configJson {
-		for _, command := range commands {
-			if strings.Contains(command, key) {
-				if val == nil {
-					log.LogDebug(fmt.Sprintf("No config found for key: %v in path %v", key, path))
-				} else {
-					permissions, err := parseNextJsonLevel(val)
-					if err {
-						log.LogErr("Malformed root config json, please check your config at path: ", path)
-					}
-					configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
-					log.PrettyJson(configs)
-				}
-			}
+		var command string
+		if strings.Contains(key, "*") {
+			command = strings.TrimSuffix(key, "*")
+		} else {
+			command = key
+		}
+		if exists := mapping[command]; exists {
+			configs = parseOptionsForCommand(paths, path, val, configs)
+		} else {
+			log.LogDev(fmt.Sprintf("No config found for key: %v in path %v", key, path))
 		}
 	}
 	if len(configs) == 0 {
 		log.LogErr(fmt.Sprintf("You have a config file at path %v, but no keys were found", path))
 	}
 	return mergeConfig(configs...)
+}
+
+func buildCommandMap(commands []string) map[string]bool {
+	aggregate := ""
+	mapping := map[string]bool{}
+	for _, command := range commands {
+		if aggregate != "" {
+			aggregate = aggregate + " " + command
+			mapping[aggregate] = true
+		} else {
+			aggregate = command
+		}
+		mapping[command] = true
+	}
+	return mapping
+}
+
+func parseOptionsForCommand(paths *types.Paths, path string, val interface{}, configs []*types.SbConfig) []*types.SbConfig {
+	permissions, err := parseNextJsonLevel(val)
+	if err {
+		log.LogErr("Malformed root config json, please check your config at path: ", path)
+	}
+	configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
+	return configs
 }
 
 func parseNextJsonLevel(config interface{}) (map[string]interface{}, bool) {

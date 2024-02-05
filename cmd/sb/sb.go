@@ -11,6 +11,7 @@ import (
 	"sb/internal/sandbox"
 	"sb/internal/types"
 	"sb/internal/util"
+	"strconv"
 )
 
 func main() {
@@ -19,6 +20,8 @@ func main() {
 
 	// set relevant paths
 	configAllPath(&context)
+
+	parseEnvs()
 
 	// set config parameter
 	setConfigParams(&context, input)
@@ -39,6 +42,19 @@ func main() {
 		// Run the sandbox
 		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
 		osHelper.Run(args)
+	}
+}
+
+func parseEnvs() {
+	for _, env := range types.AllEnvs {
+		val := os.Getenv(env)
+		if env == types.DEV_MODE && val != "" {
+			if val, err := strconv.ParseBool(val); err == nil {
+				types.Envs.DevModeEnabled = val
+			} else {
+				log.LogErr(fmt.Sprintf("Can not parse %v env variable please provide true or false", types.DEV_MODE))
+			}
+		}
 	}
 }
 

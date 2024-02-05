@@ -17,7 +17,6 @@ func parseCliOptions(paths *types.Paths, option string) {
 		types.CliOptions.DebugEnabled = true
 	} else if currentOption == "--dry-run" || currentOption == "-dr" {
 		types.CliOptions.DryRunEnabled = true
-		types.CliOptions.DebugEnabled = true
 	} else if currentOption == "--create-exe" || currentOption == "-ce" {
 		types.CliOptions.CreateExeEnabled = true
 	} else if currentOption == "--help" || currentOption == "-h" {

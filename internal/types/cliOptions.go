@@ -9,11 +9,13 @@ type CliOptionsStr struct {
 	EditEnabled      bool `json:"edit-enabled"`
 }
 
-var CliOptions = CliOptionsStr{
-	DebugEnabled:     false,
-	DryRunEnabled:    false,
-	CreateExeEnabled: false,
+type EnvsStr struct {
+	DevModeEnabled bool `json:"dev_mode_enabled"`
 }
+
+var CliOptions = CliOptionsStr{}
+
+var Envs = EnvsStr{}
 
 var ValidCliOptions = map[string]string{
 	"--debug":      "--debug",

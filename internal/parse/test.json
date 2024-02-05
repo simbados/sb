@@ -1,0 +1,11 @@
+{
+  "__root__config": {
+    "read": ["whatsup"]
+  },
+  "run some": {
+    "write": ["~/yes"]
+  },
+  "run*": {
+    "write": ["[wd]/okay"]
+  }
+}
