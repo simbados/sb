@@ -26,11 +26,12 @@
 - [x] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
 - [x] Fixing node binary call in npm.json (currently for nvm)
 - [ ] More testing for critical parts of the tool
-- [ ] Sophisticated parsing of config json keys with glob expansion
-- [ ] Add support of adding new config files with sb
+- [x] Sophisticated parsing of config json keys with glob expansion
+- [x] Add support of adding new config files with sb
+- [ ] Helper command to show all configs file for a binary and their content and which will be applied
+- [ ] Add support for removing config files with sb
 - [ ] Possibility to add overall config json file to apply to all commands
-- [ ] Helper command to show all configs file for a binary and their content
-- [ ] Add TLDR;
+- [ ] Add TLDR; for README
 
 ## Installation
 **Building from Source**  

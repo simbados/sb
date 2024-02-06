@@ -17,7 +17,7 @@ func EditFile(commands []string, paths types.Paths) {
 	cmd := exec.Command("sh", "-c", "echo $EDITOR")
 	output, err := cmd.Output()
 	if err != nil {
-		showErrorWith(err)
+		showErrorIfError(err)
 	}
 	var defaultEditor, path string
 	if len(output) < 2 {
@@ -26,15 +26,9 @@ func EditFile(commands []string, paths types.Paths) {
 		defaultEditor = string(output[:len(output)-1])
 	}
 	if commands[0] == "root" {
-		path = filepath.Join(paths.RootConfigPath, commands[1]+".json")
-		if exists, err := DoesPathExist(path); !exists {
-			showErrorWith(err)
-		}
+		path = getPath(commands[1], paths.RootConfigPath, path)
 	} else if commands[0] == "local" {
-		path = filepath.Join(paths.LocalConfigPath, commands[1]+".json")
-		if exists, err := DoesPathExist(path); !exists {
-			showErrorWith(err)
-		}
+		path = getPath(commands[1], paths.LocalConfigPath, path)
 	} else {
 		showError()
 	}
@@ -43,8 +37,26 @@ func EditFile(commands []string, paths types.Paths) {
 	os.Exit(0)
 }
 
-func showErrorWith(error error) {
-	log.LogErr(error)
+func getPath(binaryName string, configPath, path string) string {
+	path = filepath.Join(configPath, binaryName+".json")
+	if exists, _ := DoesPathExist(path); !exists {
+		var answer string
+		log.LogInfoSl(fmt.Sprintf("File does not exist, do you want to create it at path %v? (y)es/(n)o ", path))
+		if _, scanErr := fmt.Scanln(&answer); scanErr != nil {
+			showErrorIfError(scanErr)
+		} else {
+			if configPathExists, err := DoesPathExist(configPath); !configPathExists {
+				showErrorIfError(err)
+			}
+		}
+	}
+	return path
+}
+
+func showErrorIfError(error error) {
+	if error != nil {
+		log.LogErr(error)
+	}
 }
 
 func showError() {
