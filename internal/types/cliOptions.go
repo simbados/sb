@@ -32,4 +32,5 @@ var ValidCliOptions = map[string]string{
 	"-i":           "-i",
 	"--edit":       "--edit",
 	"-e":           "-e",
+	"-s":           "--show",
 }

@@ -1,34 +1,13 @@
-package parse
+package util
 
 import (
 	"errors"
 	"path/filepath"
 	"regexp"
 	"sb/internal/log"
-	"sb/internal/sandbox"
 	"sb/internal/types"
-	"sb/internal/util"
 	"strings"
 )
-
-func parseCliOptions(paths *types.Paths, option string) {
-	currentOption := types.ValidCliOptions[option]
-	if currentOption == "--debug" || currentOption == "-d" {
-		types.CliOptions.DebugEnabled = true
-	} else if currentOption == "--dry-run" || currentOption == "-dr" {
-		types.CliOptions.DryRunEnabled = true
-	} else if currentOption == "--create-exe" || currentOption == "-ce" {
-		types.CliOptions.CreateExeEnabled = true
-	} else if currentOption == "--help" || currentOption == "-h" {
-		util.PrintHelp()
-	} else if currentOption == "--version" || currentOption == "-v" {
-		util.ShowVersion()
-	} else if currentOption == "--init" || currentOption == "-i" {
-		sandbox.Init(paths)
-	} else if currentOption == "--edit" || currentOption == "-e" {
-		types.CliOptions.EditEnabled = true
-	}
-}
 
 func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfig, []string) {
 	var options []string
@@ -40,7 +19,6 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 			split, splitValue := parseCliConfigParam(value)
 			if _, exist := types.ValidCliOptions[split]; exist {
 				options = append(options, value)
-				parseCliOptions(paths, value)
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
 				cliConfig = addToCliConfig(paths, cliConfig, cliConfigSb, splitValue, split)
 			} else {
@@ -51,13 +29,14 @@ func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfi
 			break
 		}
 	}
-	if len(options) == len(args) {
-		log.LogErr("Please specify the program that you want to sandbox")
+	var commands []string
+	if len(args) != len(options) {
+		commands = args[optionsUntilIndex:]
 	}
 	if cliConfig != nil {
-		return options, cliConfig, args[optionsUntilIndex:]
+		return options, cliConfig, commands
 	} else {
-		return options, nil, args[optionsUntilIndex:]
+		return options, nil, commands
 	}
 }
 

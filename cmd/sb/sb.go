@@ -7,7 +7,6 @@ import (
 	"os/user"
 	"sb/internal/log"
 	"sb/internal/osHelper"
-	"sb/internal/parse"
 	"sb/internal/sandbox"
 	"sb/internal/types"
 	"sb/internal/util"
@@ -25,9 +24,10 @@ func main() {
 
 	// set config parameter
 	setConfigParams(&context, input)
+
 	// parse config files
 	if context.Config.CliConfig == nil {
-		context.Config.SbConfig = parse.ConfigFileParsing(&context)
+		context.Config.SbConfig = util.ConfigFileParsing(&context)
 	} else {
 		log.LogDebug("Using cli options")
 		context.Config.SbConfig = context.Config.CliConfig
@@ -58,15 +58,43 @@ func parseEnvs() {
 	}
 }
 
-func setConfigParams(context *types.Context, args []string) {
-	cliOptions, cliConfig, commands := parse.OptionsParsing(&context.Paths, args[1:])
-	if types.CliOptions.EditEnabled {
-		util.EditFile(commands, context.Paths)
+func checkCliOptions(context *types.Context, commands []string) {
+	for _, currentOption := range context.Config.CliOptions {
+		if currentOption == "--debug" || currentOption == "-d" {
+			types.CliOptions.DebugEnabled = true
+		} else if currentOption == "--dry-run" || currentOption == "-dr" {
+			types.CliOptions.DryRunEnabled = true
+		} else if currentOption == "--create-exe" || currentOption == "-ce" {
+			types.CliOptions.CreateExeEnabled = true
+		} else if currentOption == "--help" || currentOption == "-h" {
+			util.PrintHelp()
+		} else if currentOption == "--version" || currentOption == "-v" {
+			util.ShowVersion()
+		} else if currentOption == "--init" || currentOption == "-i" {
+			util.Init(&context.Paths)
+		} else if currentOption == "--edit" || currentOption == "-e" {
+			util.EditFile(commands, context.Paths)
+		} else if currentOption == "--show" || currentOption == "-s" {
+			fmt.Println(commands)
+			if len(commands) != 1 {
+				log.LogErr(`
+You need to specify which config files you want to see
+E.g. sb -s npm
+`)
+			}
+			util.ShowConfig(context, commands[0])
+		}
 	}
+}
+
+func setConfigParams(context *types.Context, args []string) {
+	cliOptions, cliConfig, commands := util.OptionsParsing(&context.Paths, args[1:])
 	context.Config.CliConfig = cliConfig
 	if len(cliOptions) != 0 {
 		context.Config.CliOptions = cliOptions
 	}
+	// Check which options are enabled from the user
+	checkCliOptions(context, commands)
 	context.Paths.BinaryPath = getPathToExecutable(commands[0])
 	context.Config.BinaryName = commands[0]
 	context.Config.Commands = commands[1:]
@@ -85,7 +113,6 @@ func configAllPath(context *types.Context) {
 	context.Paths.RootConfigPath = context.Paths.HomePath + types.ConfigRepo
 	context.Paths.WorkingDir = getWorkingDir()
 	context.Paths.BinPath = "/usr/bin"
-	context.Paths.LocalConfigPath = context.Paths.WorkingDir + types.LocalConfigPath
 	sbBinPath, err := os.Executable()
 	if err != nil {
 		log.LogErr(err)

@@ -1,4 +1,4 @@
-package sandbox
+package util
 
 import (
 	"embed"
@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"sb/internal/log"
 	"sb/internal/types"
-	"sb/internal/util"
 )
 
 func Init(paths *types.Paths) {
@@ -96,7 +95,7 @@ var configDir embed.FS
 
 func createSbConfig(sbConfigPath string) {
 	log.LogInfoLn("Creating .sb-config...")
-	if val, _ := util.DoesPathExist(sbConfigPath); val {
+	if val, _ := DoesPathExist(sbConfigPath); val {
 		log.LogWarn(fmt.Sprintf("There is already an existing config directory at %v \nPlease create a backup or remove it to have the default configuration", sbConfigPath))
 	} else {
 		log.LogInfoLn(fmt.Sprintf("Creating directory at destination %v", sbConfigPath))

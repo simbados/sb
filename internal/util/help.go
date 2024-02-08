@@ -14,6 +14,7 @@ func PrintHelp() {
 			"--dry-run -dr		Do not execute the sandbox with the wanted binary will set debug and print to true so that you have all the information what sb would do\n" +
 			"--create-exe -ce	Creates executable shim for binary, so that you can use the sandboxed binary within other programs which would natively use the normal binary\n" +
 			"--help -h		Print this help section\n" +
-			"--version -v		Show which version of sb is installed\n")
+			"--version -v		Show which version of sb is installed\n" +
+			"--show -s		Show location of all config files for this binary and the content of the file that would be applied\n")
 	os.Exit(0)
 }

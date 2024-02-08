@@ -1,16 +1,15 @@
-package parse
+package util
 
 import (
 	"fmt"
 	"sb/internal/log"
 	"sb/internal/types"
-	"sb/internal/util"
 	"slices"
 	"strings"
 )
 
 func doesRootConfigDirExist(path string) bool {
-	isRootConfigExisting, err := util.DoesPathExist(path)
+	isRootConfigExisting, err := DoesPathExist(path)
 	if !isRootConfigExisting {
 		log.LogWarn("Root config directory does not exist", err)
 		// TODO: this could be on first run we might want to make sure it exists at this point
@@ -20,7 +19,7 @@ func doesRootConfigDirExist(path string) bool {
 	return true
 }
 
-func getSubdirectories(path string, homePath string) []string {
+func GetSubdirectories(path string, homePath string) []string {
 	var allPaths []string
 	currentPath := ""
 	paths := strings.Split(path, "/")
@@ -35,49 +34,71 @@ func getSubdirectories(path string, homePath string) []string {
 	return allPaths
 }
 
-// ConfigFileParsing Here we only parse the config files, cli configs have already been parsed
-func ConfigFileParsing(context *types.Context) *types.SbConfig {
-	globalConfig := &types.SbConfig{}
-	allLocalPath := getSubdirectories(context.Paths.WorkingDir, context.Paths.HomePath)
+func LocalConfigPath(paths *types.Paths, binaryName string) (string, bool) {
+	allLocalPath := GetSubdirectories(paths.WorkingDir, paths.HomePath)
 	var localConfigExists bool
 	var localConfigPath string
 	for _, localPath := range allLocalPath {
-		localConfigPath = localPath + types.LocalConfigPath + "/" + context.Config.BinaryName + ".json"
-		localConfigExists, _ = util.DoesPathExist(localConfigPath)
+		localConfigPath = localPath + types.LocalConfigPath + "/" + binaryName + ".json"
+		localConfigExists, _ = DoesPathExist(localConfigPath)
 		if localConfigExists {
 			break
 		}
 	}
+	return localConfigPath, localConfigExists
+}
+
+// ConfigFileParsing Here we only parse the config files, cli configs have already been parsed
+func ConfigFileParsing(context *types.Context) *types.SbConfig {
+	globalConfig := &types.SbConfig{}
+	sbConfig, localConfigExists := extractLocalConfig(context)
 	if localConfigExists {
-		localConfig := parseRootBinaryConfig(&context.Paths, localConfigPath, context.Config.Commands)
-		log.LogDebug("Using local config file")
-		return localConfig
+		return sbConfig
+	}
+	config, rootConfigExists := extractRootConfig(context, globalConfig)
+	if rootConfigExists {
+		return config
+	}
+	return nil
+}
+
+func extractLocalConfig(context *types.Context) (*types.SbConfig, bool) {
+	localConfigPath, localConfigExists := LocalConfigPath(&context.Paths, context.Config.BinaryName)
+	if localConfigExists {
+		context.Paths.LocalConfigPath = localConfigPath
+		localConfig := parseJsonConfig(&context.Paths, localConfigPath, context.Config.Commands)
+		log.LogDebug("Using local config file at path ", localConfigPath)
+		return localConfig, true
 	} else {
 		log.LogDebug("No local config file found at: ", localConfigPath)
 		log.LogDebug("Proceeding without local config")
 	}
+	return nil, false
+}
+
+func extractRootConfig(context *types.Context, globalConfig *types.SbConfig) (*types.SbConfig, bool) {
 	if doesRootConfigDirExist(context.Paths.RootConfigPath) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
-		binaryPathExists, _ := util.DoesPathExist(binaryGlobalConfigPath)
+		binaryPathExists, _ := DoesPathExist(binaryGlobalConfigPath)
 		if !binaryPathExists {
 			log.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
-			globalConfig = parseRootBinaryConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
+			globalConfig = parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
 			log.LogDebug("Using global config file")
-			return globalConfig
+			return globalConfig, true
 		}
 	} else {
 		log.LogDebug("No root config file found at: ", context.Paths.RootConfigPath)
 		log.LogDebug("Proceeding without global config")
 	}
-	return nil
+	return nil, false
 }
 
-func parseRootBinaryConfig(paths *types.Paths, path string, commands []string) *types.SbConfig {
+func parseJsonConfig(paths *types.Paths, path string, commands []string) *types.SbConfig {
 	mapping := buildCommandMap(commands)
 	mapping["__root-config__"] = true
 	var configs []*types.SbConfig
-	configJson := util.ParseJson(path)
+	configJson := ParseJson(path)
 	for key, val := range configJson {
 		var command string
 		if strings.Contains(key, "*") {

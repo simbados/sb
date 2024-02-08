@@ -28,7 +28,7 @@
 - [ ] More testing for critical parts of the tool
 - [x] Sophisticated parsing of config json keys with glob expansion
 - [x] Add support of adding new config files with sb
-- [ ] Helper command to show all configs file for a binary and their content and which will be applied
+- [x] Helper command to show all configs file for a binary and their content and which will be applied
 - [ ] Add support for removing config files with sb
 - [ ] Possibility to add overall config json file to apply to all commands
 - [ ] Add TLDR; for README
