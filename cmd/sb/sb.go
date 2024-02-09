@@ -11,6 +11,7 @@ import (
 	"sb/internal/types"
 	"sb/internal/util"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -41,6 +42,8 @@ func main() {
 	if !types.CliOptions.DryRunEnabled {
 		// Run the sandbox
 		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
+		log.LogHighlight("Running sandbox exec with following command")
+		log.LogHighlight(strings.Join(args[3:], " "))
 		osHelper.Run(args)
 	}
 }

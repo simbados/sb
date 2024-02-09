@@ -30,8 +30,11 @@
 - [x] Add support of adding new config files with sb
 - [x] Helper command to show all configs file for a binary and their content and which will be applied
 - [ ] Add support for removing config files with sb
+- [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
 - [ ] Possibility to add overall config json file to apply to all commands
 - [ ] Add TLDR; for README
+- [ ] Vigilant mode, ask at the end to proceed with command and config
+- [ ] Print command that is run when passing args to sandbox-exec
 
 ## Installation
 **Building from Source**  
