@@ -155,31 +155,48 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 			log.LogErr(fmt.Sprintf("Found unsupported key in your binary config, please remove this key: %s at path %s\n", key, path))
 		}
 	}
-	read, readExists := binaryConfig["read"].([]interface{})
-	write, writeExists := binaryConfig["write"].([]interface{})
-	readWrite, readWriteExists := binaryConfig["read-write"].([]interface{})
-	process, processExists := binaryConfig["process"].([]interface{})
-	netOut, netOutExists := binaryConfig["net-out"].(bool)
-	netIn, netInExists := binaryConfig["net-in"].(bool)
+	read, readExists := binaryConfig["read"]
+	write, writeExists := binaryConfig["write"]
+	readWrite, readWriteExists := binaryConfig["read-write"]
+	process, processExists := binaryConfig["process"]
+	netOut, netOutExists := binaryConfig["net-out"]
+	netIn, netInExists := binaryConfig["net-in"]
 	if readExists {
-		sbConfig.Read = convertJsonArrayToStringArray(paths, read)
+		sbConfig.Read = parseIfExists(paths, read, sbConfig, path, "read")
 	}
 	if writeExists {
-		sbConfig.Write = convertJsonArrayToStringArray(paths, write)
+		sbConfig.Write = parseIfExists(paths, write, sbConfig, path, "write")
 	}
 	if readWriteExists {
-		sbConfig.ReadWrite = convertJsonArrayToStringArray(paths, readWrite)
+		sbConfig.ReadWrite = parseIfExists(paths, readWrite, sbConfig, path, "read-write")
 	}
 	if processExists {
-		sbConfig.Process = convertJsonArrayToStringArray(paths, process)
+		sbConfig.Process = parseIfExists(paths, process, sbConfig, path, "process")
 	}
 	if netOutExists {
-		sbConfig.NetworkOutbound = netOut
+		if value, exists := netOut.(bool); exists {
+			sbConfig.NetworkOutbound = value
+		} else {
+			log.LogErr(fmt.Sprintf("Your net-out config at path %v, is not a boolean value", path))
+		}
 	}
 	if netInExists {
-		sbConfig.NetworkInbound = netIn
+		if value, exists := netIn.(bool); exists {
+			sbConfig.NetworkInbound = value
+		} else {
+			log.LogErr(fmt.Sprintf("Your net-in config at path %v, is not a boolean value", path))
+		}
 	}
 	return sbConfig
+}
+
+func parseIfExists(paths *types.Paths, jsonKey interface{}, sbConfig *types.SbConfig, path string, configName string) []string {
+	if arr, exists := jsonKey.([]interface{}); exists {
+		return convertJsonArrayToStringArray(paths, arr)
+	} else {
+		log.LogErr(fmt.Sprintf("Your %v config at path %v, contains a value which should be an array but is not.", configName, path))
+	}
+	return []string{}
 }
 
 func convertJsonArrayToStringArray(paths *types.Paths, jsonArray []interface{}) []string {

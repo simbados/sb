@@ -110,7 +110,7 @@ const globMiddleRegex = `\*\*\/`
 const globMiddleReplace = `(.+\/)?`
 const globSingleRegex = `\*`
 
-const globSingleReplace = `^[^\/]*`
+const globSingleReplace = `[^\/]*`
 
 func buildSymbolToPathMatching(paths *types.Paths) map[string]string {
 	return map[string]string{

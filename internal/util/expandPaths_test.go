@@ -36,10 +36,10 @@ func TestExpandPathSuccess(t *testing.T) {
 		{"./whatsup", "(literal \"/Users/test/sb/whatsup\")"},
 		{"/Users/test/**", "(regex #\"/Users/test/(.+)\")"},
 		{"/Users/**/test", "(regex #\"/Users/(.+\\/)?test\")"},
-		{"/Users/test/*.js", "(regex #\"/Users/test/^[^\\/]*\\.js\")"},
+		{"/Users/test/*.js", "(regex #\"/Users/test/[^\\/]*\\.js\")"},
 		{"[wd]/../hello", "(literal \"/Users/test/hello\")"},
 		{"[wd]/../hello/../what", "(literal \"/Users/test/what\")"},
-		{"[wd]/../hello/../what*", "(regex #\"/Users/test/what^[^\\/]*\")"},
+		{"[wd]/../hello/../what*", "(regex #\"/Users/test/what[^\\/]*\")"},
 	}
 
 	paths := types.Paths{LocalConfigPath: "Users/test/sb", HomePath: "/Users/test", RootConfigPath: "Users/test", WorkingDir: "/Users/test/sb", BinPath: "/usr/bin", BinaryPath: "/usr/bin/ls"}
