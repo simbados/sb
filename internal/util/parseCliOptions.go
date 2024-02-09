@@ -81,14 +81,14 @@ func addToConfig(config *types.SbConfig, key string, value string) *types.SbConf
 		if !exists {
 			log.LogErr("You must provide true or false value for cli config: ", value)
 		}
-		config.NetworkInbound = boolVal
+		config.NetworkInbound = &types.BoolOrNil{Value: boolVal}
 		break
 	case "--net-out":
 		boolVal, exists := parseStringBoolean(value)
 		if !exists {
 			log.LogErr("You must provide true or false value for cli config: ", value)
 		}
-		config.NetworkOutbound = boolVal
+		config.NetworkOutbound = &types.BoolOrNil{Value: boolVal}
 		break
 	}
 	return config

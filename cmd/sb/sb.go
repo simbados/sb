@@ -78,7 +78,6 @@ func checkCliOptions(context *types.Context, commands []string) {
 		} else if currentOption == "--edit" || currentOption == "-e" {
 			util.EditFile(commands, context.Paths)
 		} else if currentOption == "--show" || currentOption == "-s" {
-			fmt.Println(commands)
 			if len(commands) != 1 {
 				log.LogErr(`
 You need to specify which config files you want to see

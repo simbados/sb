@@ -50,53 +50,54 @@ func LocalConfigPath(paths *types.Paths, binaryName string) (string, bool) {
 
 // ConfigFileParsing Here we only parse the config files, cli configs have already been parsed
 func ConfigFileParsing(context *types.Context) *types.SbConfig {
-	globalConfig := &types.SbConfig{}
-	sbConfig, localConfigExists := extractLocalConfig(context)
-	if localConfigExists {
-		return sbConfig
-	}
-	config, rootConfigExists := extractRootConfig(context, globalConfig)
-	if rootConfigExists {
-		return config
-	}
-	return nil
+	localConfig := extractLocalConfig(context)
+	rootConfig := extractRootConfig(context)
+	return mergeConfig(localConfig, rootConfig)
 }
 
-func extractLocalConfig(context *types.Context) (*types.SbConfig, bool) {
+func extractLocalConfig(context *types.Context) *types.SbConfig {
 	localConfigPath, localConfigExists := LocalConfigPath(&context.Paths, context.Config.BinaryName)
 	if localConfigExists {
 		context.Paths.LocalConfigPath = localConfigPath
 		localConfig := parseJsonConfig(&context.Paths, localConfigPath, context.Config.Commands)
 		log.LogDebug("Using local config file at path ", localConfigPath)
-		return localConfig, true
+		return localConfig
 	} else {
 		log.LogDebug("No local config file found at: ", localConfigPath)
 		log.LogDebug("Proceeding without local config")
 	}
-	return nil, false
+	return nil
 }
 
-func extractRootConfig(context *types.Context, globalConfig *types.SbConfig) (*types.SbConfig, bool) {
+func extractRootConfig(context *types.Context) *types.SbConfig {
+	binaryGlobalConfigPath, exists := doesRootConfigExists(context)
+	if exists {
+		globalConfig := parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
+		return globalConfig
+	}
+	return nil
+}
+
+func doesRootConfigExists(context *types.Context) (string, bool) {
 	if doesRootConfigDirExist(context.Paths.RootConfigPath) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
 		binaryPathExists, _ := DoesPathExist(binaryGlobalConfigPath)
 		if !binaryPathExists {
 			log.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
-			globalConfig = parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
 			log.LogDebug("Using global config file")
-			return globalConfig, true
+			return binaryGlobalConfigPath, true
 		}
 	} else {
 		log.LogDebug("No root config file found at: ", context.Paths.RootConfigPath)
 		log.LogDebug("Proceeding without global config")
 	}
-	return nil, false
+	return "", false
 }
 
 func parseJsonConfig(paths *types.Paths, path string, commands []string) *types.SbConfig {
 	mapping := buildCommandMap(commands)
-	mapping["__root-config__"] = true
+	mapping[types.RootConfigKey] = true
 	var configs []*types.SbConfig
 	configJson := ParseJson(path)
 	for key, val := range configJson {
@@ -162,27 +163,27 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 	netOut, netOutExists := binaryConfig["net-out"]
 	netIn, netInExists := binaryConfig["net-in"]
 	if readExists {
-		sbConfig.Read = parseIfExists(paths, read, sbConfig, path, "read")
+		sbConfig.Read = parseIfExists(paths, read, path, "read")
 	}
 	if writeExists {
-		sbConfig.Write = parseIfExists(paths, write, sbConfig, path, "write")
+		sbConfig.Write = parseIfExists(paths, write, path, "write")
 	}
 	if readWriteExists {
-		sbConfig.ReadWrite = parseIfExists(paths, readWrite, sbConfig, path, "read-write")
+		sbConfig.ReadWrite = parseIfExists(paths, readWrite, path, "read-write")
 	}
 	if processExists {
-		sbConfig.Process = parseIfExists(paths, process, sbConfig, path, "process")
+		sbConfig.Process = parseIfExists(paths, process, path, "process")
 	}
 	if netOutExists {
 		if value, exists := netOut.(bool); exists {
-			sbConfig.NetworkOutbound = value
+			sbConfig.NetworkOutbound = &types.BoolOrNil{Value: value}
 		} else {
 			log.LogErr(fmt.Sprintf("Your net-out config at path %v, is not a boolean value", path))
 		}
 	}
 	if netInExists {
 		if value, exists := netIn.(bool); exists {
-			sbConfig.NetworkInbound = value
+			sbConfig.NetworkInbound = &types.BoolOrNil{Value: value}
 		} else {
 			log.LogErr(fmt.Sprintf("Your net-in config at path %v, is not a boolean value", path))
 		}
@@ -190,7 +191,7 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 	return sbConfig
 }
 
-func parseIfExists(paths *types.Paths, jsonKey interface{}, sbConfig *types.SbConfig, path string, configName string) []string {
+func parseIfExists(paths *types.Paths, jsonKey interface{}, path string, configName string) []string {
 	if arr, exists := jsonKey.([]interface{}); exists {
 		return convertJsonArrayToStringArray(paths, arr)
 	} else {
@@ -223,12 +224,24 @@ func mergeConfig(configToMerge ...*types.SbConfig) *types.SbConfig {
 			newConfig.Read = appendUniqueStrings(newConfig.Read, config.Read...)
 			newConfig.Process = appendUniqueStrings(newConfig.Process, config.Process...)
 			newConfig.ReadWrite = appendUniqueStrings(newConfig.ReadWrite, config.ReadWrite...)
-			// Network in/out-bound can not really be merged if it is prohibited once it should be enforced
-			newConfig.NetworkOutbound = newConfig.NetworkOutbound || config.NetworkOutbound
-			newConfig.NetworkInbound = newConfig.NetworkInbound || config.NetworkInbound
+			// Network in/out-bound can not really be merged if it is allowed once it should be allowed
+			newConfig.NetworkOutbound = mergeBoolOrNil(newConfig.NetworkOutbound, config.NetworkOutbound)
+			newConfig.NetworkInbound = mergeBoolOrNil(newConfig.NetworkInbound, config.NetworkInbound)
 		}
 	}
 	return newConfig
+}
+
+func mergeBoolOrNil(a *types.BoolOrNil, b *types.BoolOrNil) *types.BoolOrNil {
+	if a == nil && b == nil {
+		return nil
+	} else if a == nil {
+		return b
+	} else if b == nil {
+		return a
+	} else {
+		return &types.BoolOrNil{Value: a.Value && b.Value}
+	}
 }
 
 func appendUniqueStrings(array []string, stringsToMerge ...string) []string {

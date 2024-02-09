@@ -146,7 +146,7 @@ func read(config *types.SbConfig, profile string) string {
 }
 
 func netOut(config *types.SbConfig, profile string) string {
-	if config.NetworkOutbound {
+	if config.NetworkOutbound != nil && config.NetworkOutbound.Value {
 		profile += `
 ; allow-net-outbound: enabled
 (allow network-inbound
@@ -183,7 +183,7 @@ func addFallBackForCert(config *types.SbConfig, profile string) string {
 }
 
 func netIn(config *types.SbConfig, profile string) string {
-	if config.NetworkInbound {
+	if config.NetworkInbound != nil && config.NetworkInbound.Value {
 		profile += `
 ; allow-net-inbound: enabled
 (allow network-bind network-inbound

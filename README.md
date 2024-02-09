@@ -25,16 +25,21 @@
   - [x] Support multiple shells (fish, zsh, bash, etc)
 - [x] ~~Flag for creating shim executable for binary (aliasing will be enough for now)~~
 - [x] Fixing node binary call in npm.json (currently for nvm)
-- [ ] More testing for critical parts of the tool
 - [x] Sophisticated parsing of config json keys with glob expansion
 - [x] Add support of adding new config files with sb
 - [x] Helper command to show all configs file for a binary and their content and which will be applied
-- [ ] Add support for removing config files with sb
+- [x] Print command that is run when passing args to sandbox-exec
+- [x] Always apply __root-config__ of root config for binary and show in sb -s command
+- [x] Merge local and root config
 - [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
-- [ ] Possibility to add overall config json file to apply to all commands
+  - [x] No array/bool provided
+  - [ ] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys)
+- [ ] Add support for removing config files with sb
+- [ ] Possibility to add overall config json file to apply to all commands (discuss if good idea?)
 - [ ] Add TLDR; for README
 - [ ] Vigilant mode, ask at the end to proceed with command and config
-- [ ] Print command that is run when passing args to sandbox-exec
+- [ ] Option for only applying root or local config ```-c local -c root```
+- [ ] More testing for critical parts of the tool
 
 ## Installation
 **Building from Source**  
@@ -96,9 +101,11 @@ E.g.
 **The config files need arrays for read/write/read-write/process, the cli config expects a string
 which is comma seperated!**
 
-**Attention**: If you have multiple configs for a binary, sb will take the arguments with the highest priority  
-Order of priority: cli arguments > local config > global config  
-E.g. You deny net-inbound on the global config, but your local config allows it, then it will be allowed  
+**Attention**: If you have multiple configs for a binary, sb will merge these configs, so it will append 
+any strings from read/write/read-write/process and net out and net in will only be allowed if
+all configs allow it. If one config does not allow it, then it will be forbidden.
+E.g. root config does allow ```"net-out": true```, but your local config has ```"net-out": false```,
+then net-out will be forbidden.
 
 ## Configuration flags
 
@@ -111,7 +118,7 @@ Run sb --help for all available flags
 Takes two additional arguments first must be either local/root and second name of binary you would like to edit
 E.g. ```sb -e root npm``` (edits the npm.json file in the root directory)  
 E.g. ```sb -e local npm``` (edits the npm.json file in the local directory)  
-Does currently not support creating new config files, is on the TODO list :)
+- --show (-s): Displays which config will be applied for binary, use as ```sb -s npm```
 
 
 ## FAQS

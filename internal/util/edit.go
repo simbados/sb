@@ -11,7 +11,6 @@ import (
 )
 
 func EditFile(commands []string, paths types.Paths) {
-	fmt.Println(commands)
 	if len(commands) != 2 {
 		showError()
 	}
