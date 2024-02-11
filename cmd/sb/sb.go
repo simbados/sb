@@ -35,15 +35,32 @@ func main() {
 	}
 
 	// build sandbox profile
-	profile := sandbox.BuildSandboxProfile(&context)
+	minifiedProfile, profile := sandbox.BuildSandboxProfile(&context)
 
 	log.LogDebug(log.PrettyJson(&context))
 
 	if !types.CliOptions.DryRunEnabled {
 		// Run the sandbox
-		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), profile), context.Config.BinaryName), context.Config.Commands...))
+		args := append(append(append(append(append(append([]string{}, "sandbox-exec"), "-p"), minifiedProfile), context.Config.BinaryName), context.Config.Commands...))
 		log.LogHighlight("Running sandbox exec with following command")
-		log.LogHighlight(strings.Join(args[3:], " "))
+		if types.CliOptions.VigilantModeEnabled {
+			log.LogInfoLn("The sandbox profile:")
+			log.LogInfoLn(profile)
+			log.LogHighlight("Do you want to run the command")
+			log.LogHighlight(strings.Join(args[3:], " "))
+			log.LogHighlightSl("(Y)es/(n)o ")
+			var answer string
+			_, err := fmt.Scanln(&answer)
+			if err != nil {
+				log.LogErr("Can not read your input")
+			}
+			if answer != "y" {
+				log.LogInfoLn("Exiting program without running binary")
+				os.Exit(0)
+			}
+		} else {
+			log.LogHighlight(strings.Join(args[3:], " "))
+		}
 		osHelper.Run(args)
 	}
 }
@@ -85,6 +102,8 @@ E.g. sb -s npm
 `)
 			}
 			util.ShowConfig(context, commands[0])
+		} else if currentOption == "--vigilant" || currentOption == "-vi" {
+			types.CliOptions.VigilantModeEnabled = true
 		}
 	}
 }

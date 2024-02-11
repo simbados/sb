@@ -1,12 +1,13 @@
 package types
 
 type CliOptionsStr struct {
-	DebugEnabled     bool `json:"debug-enabled"`
-	DryRunEnabled    bool `json:"dry-run-enabled"`
-	CreateExeEnabled bool `json:"create-exe-enabled"`
-	HelpEnabled      bool `json:"help"`
-	VersionEnabled   bool `json:"version-enabled"`
-	EditEnabled      bool `json:"edit-enabled"`
+	DebugEnabled        bool `json:"debug-enabled"`
+	DryRunEnabled       bool `json:"dry-run-enabled"`
+	CreateExeEnabled    bool `json:"create-exe-enabled"`
+	HelpEnabled         bool `json:"help"`
+	VersionEnabled      bool `json:"version-enabled"`
+	EditEnabled         bool `json:"edit-enabled"`
+	VigilantModeEnabled bool `json:"vigilant_mode_enabled"`
 }
 
 type EnvsStr struct {
@@ -33,4 +34,5 @@ var ValidCliOptions = map[string]string{
 	"--edit":       "--edit",
 	"-e":           "-e",
 	"-s":           "--show",
+	"-vi":          "--vigilant",
 }

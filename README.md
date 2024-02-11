@@ -37,7 +37,7 @@
 - [ ] Add support for removing config files with sb
 - [ ] Possibility to add overall config json file to apply to all commands (discuss if good idea?)
 - [ ] Add TLDR; for README
-- [ ] Vigilant mode, ask at the end to proceed with command and config
+- [x] Vigilant mode, ask at the end to proceed with command and config
 - [ ] Option for only applying root or local config ```-c local -c root```
 - [ ] More testing for critical parts of the tool
 

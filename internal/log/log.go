@@ -16,6 +16,7 @@ type LoggerType interface {
 	LogInfoLn(args ...any)
 	LogInfoSl(args ...any)
 	LogHighlight(args ...any)
+	LogHighlightSl(args ...any)
 	PrettyJson(toPretty any) string
 }
 
@@ -31,6 +32,12 @@ func (il ImplLogger) LogErr(args ...any) {
 func (il ImplLogger) LogHighlight(args ...any) {
 	fmt.Print(ColorGreen)
 	fmt.Println(args...)
+	fmt.Print(ColorReset)
+}
+
+func (il ImplLogger) LogHighlightSl(args ...any) {
+	fmt.Print(ColorGreen)
+	fmt.Print(args...)
 	fmt.Print(ColorReset)
 }
 
@@ -82,6 +89,10 @@ func LogDev(args ...any) {
 
 func LogHighlight(args ...any) {
 	Logger.LogHighlight(args...)
+}
+
+func LogHighlightSl(args ...any) {
+	Logger.LogHighlightSl(args...)
 }
 
 func LogWarn(args ...any) {
