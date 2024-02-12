@@ -26,7 +26,6 @@ func main() {
 	// set config parameter
 	setConfigParams(&context, input)
 
-	// parse config files
 	if context.Config.CliConfig == nil {
 		context.Config.SbConfig = util.ConfigFileParsing(&context)
 	} else {
@@ -34,8 +33,11 @@ func main() {
 		context.Config.SbConfig = context.Config.CliConfig
 	}
 
-	// build sandbox profile
 	minifiedProfile, profile := sandbox.BuildSandboxProfile(&context)
+
+	if types.CliOptions.ShowConfigEnabled {
+		util.ShowConfig(&context.Config, profile)
+	}
 
 	log.LogDebug(log.PrettyJson(&context))
 
@@ -95,13 +97,7 @@ func checkCliOptions(context *types.Context, commands []string) {
 		} else if currentOption == "--edit" || currentOption == "-e" {
 			util.EditFile(commands, &context.Paths)
 		} else if currentOption == "--show" || currentOption == "-s" {
-			if len(commands) != 1 {
-				log.LogErr(`
-You need to specify which config files you want to see
-E.g. sb -s npm
-`)
-			}
-			util.ShowConfig(context, commands[0])
+			types.CliOptions.ShowConfigEnabled = true
 		} else if currentOption == "--vigilant" || currentOption == "-vi" {
 			types.CliOptions.VigilantModeEnabled = true
 		}

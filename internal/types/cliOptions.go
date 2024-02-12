@@ -4,6 +4,7 @@ type CliOptionsStr struct {
 	DebugEnabled        bool `json:"debug-enabled"`
 	DryRunEnabled       bool `json:"dry-run-enabled"`
 	CreateExeEnabled    bool `json:"create-exe-enabled"`
+	ShowConfigEnabled   bool `json:"show-config-enabled"`
 	HelpEnabled         bool `json:"help"`
 	VersionEnabled      bool `json:"version-enabled"`
 	EditEnabled         bool `json:"edit-enabled"`

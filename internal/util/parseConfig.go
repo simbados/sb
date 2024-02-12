@@ -83,7 +83,7 @@ func doesRootConfigExists(context *types.Context) (string, bool) {
 		binaryGlobalConfigPath := context.Paths.RootConfigPath + "/" + context.Config.BinaryName + ".json"
 		binaryPathExists, _ := DoesPathExist(binaryGlobalConfigPath)
 		if !binaryPathExists {
-			log.LogWarn("No config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
+			log.LogDebug("No root config for binary found. You might want to create a config file at: ", context.Paths.RootConfigPath)
 		} else {
 			log.LogDebug("Using global config file")
 			return binaryGlobalConfigPath, true
