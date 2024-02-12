@@ -126,18 +126,18 @@ func parseExtendedConfig(paths *types.Paths, path string, commands []string, dep
 	var configs []*types.SbConfig
 	if value, exists := configJson[types.ExtendsConfigKey]; exists {
 		if extendPath, isString := value.(string); isString {
-			exists, err := DoesPathExist(extendPath)
+			extendPathExpanded, pathExpansionError := CommonPathExpansion(paths, extendPath)
+			if pathExpansionError != nil {
+				log.LogErr(pathExpansionError)
+			}
+			_, err := DoesPathExist(extendPathExpanded)
 			if err != nil {
-				log.LogErr(err)
+				log.LogErr(fmt.Sprintf("Error while finding extended path in config: %v \n%v", path, err))
 			}
-			if exists {
-				log.LogDebug("Extending config with config of path: ", extendPath)
-				configs = append(configs, parseJsonConfig(paths, extendPath, commands, depth+1))
-			} else {
-				log.LogWarn("Path which was provided for extending the config does not exists: ", path)
-			}
+			log.LogDebug("Extending config with config from path: ", extendPath)
+			configs = append(configs, parseJsonConfig(paths, extendPathExpanded, commands, depth+1))
 		} else {
-			log.LogWarn(types.ExtendsConfigKey, " key is not a string at path", extendPath)
+			log.LogWarn(types.ExtendsConfigKey, " key is not a string at path: ", path)
 		}
 	}
 	return configs

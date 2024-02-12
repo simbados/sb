@@ -11,7 +11,7 @@ import (
 func DoesPathExist(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		return false, errors.New("file or directory does not exist")
+		return false, errors.New(fmt.Sprintf("file or directory does not exist for path: %v", filePath))
 	} else if err != nil {
 		return false, errors.New(fmt.Sprintf("File could not be checked + %v", err))
 	} else {

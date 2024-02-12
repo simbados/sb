@@ -34,8 +34,8 @@ Sorted by priority
 - [x] Merge local and root config
 - [x] Vigilant mode, ask at the end to proceed with command and config
 - [x] Possibility to add overall config json file to apply to all commands (discuss if good idea?) - Will be solved with extend keyword
-- [ ] Extend other config file, e.g. commonNode.json could be applied to npm.json, npx.json
-  - [ ] Look for "__extend__" key while parsing. Limit to 2 parent configs
+- [x] Extend other config file, e.g. commonNode.json could be applied to npm.json, npx.json
+  - [x] Look for "__extend__" key while parsing. Limit to 2 parent configs
 - [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
   - [x] No array/bool provided
   - [ ] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys)

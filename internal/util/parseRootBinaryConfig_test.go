@@ -10,7 +10,7 @@ import (
 func TestRootConfig(t *testing.T) {
 	var commands = []string{"run", "some"}
 	paths := types.Paths{LocalConfigPath: "Users/test/sb", HomePath: "/Users/test", RootConfigPath: "Users/test", WorkingDir: "/Users/test/sb", BinPath: "/usr/bin", BinaryPath: "/usr/bin/ls"}
-	config := parseJsonConfig(&paths, "./test.json", commands, 1)
+	config := parseJsonConfig(&paths, "./testFiles/test.json", commands, 1)
 	if len(config.Write) != 2 {
 		t.Errorf("parseJsonConfig should have 2 entries for write but was %v", config.Write)
 	}

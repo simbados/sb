@@ -31,6 +31,27 @@ func buildSymbolToPathMatching(paths *types.Paths) map[string]string {
 }
 
 func expandPaths(paths *types.Paths, value string) (string, error) {
+	value, err := CommonPathExpansion(paths, value)
+	if err != nil {
+		return "", err
+	}
+	if strings.Contains(value, "*") || strings.Contains(value, ".") {
+		value = regexp.MustCompile(dotRegex).ReplaceAllString(value, dotReplace)
+		if val, err := regexp.Compile(globEndRegex); err == nil && val.MatchString(value) {
+			value = val.ReplaceAllString(value, globEndReplace)
+		} else if val, err := regexp.Compile(globMiddleRegex); err == nil && val.MatchString(value) {
+			value = val.ReplaceAllString(value, globMiddleReplace)
+		} else if val, err := regexp.Compile(globSingleRegex); err == nil && val.MatchString(value) {
+			value = val.ReplaceAllString(value, globSingleReplace)
+		}
+		value = "(regex #\"" + value + "\")"
+	} else {
+		value = "(literal \"" + value + "\")"
+	}
+	return value, nil
+}
+
+func CommonPathExpansion(paths *types.Paths, value string) (string, error) {
 	initialPath := value
 	matching := buildSymbolToPathMatching(paths)
 	for key, path := range matching {
@@ -51,19 +72,6 @@ func expandPaths(paths *types.Paths, value string) (string, error) {
 			}
 		}
 		value = "/" + filepath.Join(splits...)
-	}
-	if strings.Contains(value, "*") || strings.Contains(value, ".") {
-		value = regexp.MustCompile(dotRegex).ReplaceAllString(value, dotReplace)
-		if val, err := regexp.Compile(globEndRegex); err == nil && val.MatchString(value) {
-			value = val.ReplaceAllString(value, globEndReplace)
-		} else if val, err := regexp.Compile(globMiddleRegex); err == nil && val.MatchString(value) {
-			value = val.ReplaceAllString(value, globMiddleReplace)
-		} else if val, err := regexp.Compile(globSingleRegex); err == nil && val.MatchString(value) {
-			value = val.ReplaceAllString(value, globSingleReplace)
-		}
-		value = "(regex #\"" + value + "\")"
-	} else {
-		value = "(literal \"" + value + "\")"
 	}
 	return value, nil
 }
