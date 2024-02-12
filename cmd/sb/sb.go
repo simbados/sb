@@ -93,7 +93,7 @@ func checkCliOptions(context *types.Context, commands []string) {
 		} else if currentOption == "--init" || currentOption == "-i" {
 			util.Init(&context.Paths)
 		} else if currentOption == "--edit" || currentOption == "-e" {
-			util.EditFile(commands, context.Paths)
+			util.EditFile(commands, &context.Paths)
 		} else if currentOption == "--show" || currentOption == "-s" {
 			if len(commands) != 1 {
 				log.LogErr(`

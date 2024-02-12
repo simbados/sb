@@ -52,14 +52,14 @@ func LocalConfigPath(paths *types.Paths, binaryName string) (string, bool) {
 func ConfigFileParsing(context *types.Context) *types.SbConfig {
 	localConfig := extractLocalConfig(context)
 	rootConfig := extractRootConfig(context)
-	return mergeConfig(localConfig, rootConfig)
+	return mergeConfigs(localConfig, rootConfig)
 }
 
 func extractLocalConfig(context *types.Context) *types.SbConfig {
 	localConfigPath, localConfigExists := LocalConfigPath(&context.Paths, context.Config.BinaryName)
 	if localConfigExists {
 		context.Paths.LocalConfigPath = localConfigPath
-		localConfig := parseJsonConfig(&context.Paths, localConfigPath, context.Config.Commands)
+		localConfig := parseJsonConfig(&context.Paths, localConfigPath, context.Config.Commands, 1)
 		log.LogDebug("Using local config file at path ", localConfigPath)
 		return localConfig
 	} else {
@@ -72,7 +72,7 @@ func extractLocalConfig(context *types.Context) *types.SbConfig {
 func extractRootConfig(context *types.Context) *types.SbConfig {
 	binaryGlobalConfigPath, exists := doesRootConfigExists(context)
 	if exists {
-		globalConfig := parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands)
+		globalConfig := parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands, 1)
 		return globalConfig
 	}
 	return nil
@@ -95,11 +95,14 @@ func doesRootConfigExists(context *types.Context) (string, bool) {
 	return "", false
 }
 
-func parseJsonConfig(paths *types.Paths, path string, commands []string) *types.SbConfig {
+func parseJsonConfig(paths *types.Paths, path string, commands []string, depth int) *types.SbConfig {
+	if depth > 3 {
+		log.LogErr("Nesting of the json config is only allowed for a depth of 2")
+	}
 	mapping := buildCommandMap(commands)
 	mapping[types.RootConfigKey] = true
-	var configs []*types.SbConfig
 	configJson := ParseJson(path)
+	configs := parseExtendedConfig(paths, path, commands, depth, configJson)
 	for key, val := range configJson {
 		var command string
 		if strings.Contains(key, "*") {
@@ -108,7 +111,7 @@ func parseJsonConfig(paths *types.Paths, path string, commands []string) *types.
 			command = key
 		}
 		if exists := mapping[command]; exists {
-			configs = parseOptionsForCommand(paths, path, val, configs)
+			configs = append(configs, parseOptionsForCommand(paths, path, val))
 		} else {
 			log.LogDev(fmt.Sprintf("No config found for key: %v in path %v", key, path))
 		}
@@ -116,7 +119,28 @@ func parseJsonConfig(paths *types.Paths, path string, commands []string) *types.
 	if len(configs) == 0 {
 		log.LogErr(fmt.Sprintf("You have a config file at path %v, but no keys were found", path))
 	}
-	return mergeConfig(configs...)
+	return mergeConfigs(configs...)
+}
+
+func parseExtendedConfig(paths *types.Paths, path string, commands []string, depth int, configJson map[string]interface{}) []*types.SbConfig {
+	var configs []*types.SbConfig
+	if value, exists := configJson[types.ExtendsConfigKey]; exists {
+		if extendPath, isString := value.(string); isString {
+			exists, err := DoesPathExist(extendPath)
+			if err != nil {
+				log.LogErr(err)
+			}
+			if exists {
+				log.LogDebug("Extending config with config of path: ", extendPath)
+				configs = append(configs, parseJsonConfig(paths, extendPath, commands, depth+1))
+			} else {
+				log.LogWarn("Path which was provided for extending the config does not exists: ", path)
+			}
+		} else {
+			log.LogWarn(types.ExtendsConfigKey, " key is not a string at path", extendPath)
+		}
+	}
+	return configs
 }
 
 func buildCommandMap(commands []string) map[string]bool {
@@ -134,18 +158,17 @@ func buildCommandMap(commands []string) map[string]bool {
 	return mapping
 }
 
-func parseOptionsForCommand(paths *types.Paths, path string, val interface{}, configs []*types.SbConfig) []*types.SbConfig {
-	permissions, err := parseNextJsonLevel(val)
-	if err {
+func parseOptionsForCommand(paths *types.Paths, path string, val interface{}) *types.SbConfig {
+	permissions, valid := parseNextJsonLevel(val)
+	if !valid {
 		log.LogErr("Malformed root config json, please check your config at path: ", path)
 	}
-	configs = append(configs, parseConfigIntoStruct(paths, permissions, path))
-	return configs
+	return parseConfigIntoStruct(paths, permissions, path)
 }
 
 func parseNextJsonLevel(config interface{}) (map[string]interface{}, bool) {
 	rootConf, ok := config.(map[string]interface{})
-	return rootConf, !ok
+	return rootConf, ok
 }
 
 func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface{}, path string) *types.SbConfig {
@@ -175,14 +198,14 @@ func parseConfigIntoStruct(paths *types.Paths, binaryConfig map[string]interface
 		sbConfig.Process = parseIfExists(paths, process, path, "process")
 	}
 	if netOutExists {
-		if value, exists := netOut.(bool); exists {
+		if value, valid := netOut.(bool); valid {
 			sbConfig.NetworkOutbound = &types.BoolOrNil{Value: value}
 		} else {
 			log.LogErr(fmt.Sprintf("Your net-out config at path %v, is not a boolean value", path))
 		}
 	}
 	if netInExists {
-		if value, exists := netIn.(bool); exists {
+		if value, valid := netIn.(bool); valid {
 			sbConfig.NetworkInbound = &types.BoolOrNil{Value: value}
 		} else {
 			log.LogErr(fmt.Sprintf("Your net-in config at path %v, is not a boolean value", path))
@@ -216,7 +239,7 @@ func convertJsonArrayToStringArray(paths *types.Paths, jsonArray []interface{}) 
 	return valueStrings
 }
 
-func mergeConfig(configToMerge ...*types.SbConfig) *types.SbConfig {
+func mergeConfigs(configToMerge ...*types.SbConfig) *types.SbConfig {
 	newConfig := &types.SbConfig{}
 	for _, config := range configToMerge {
 		if config != nil {

@@ -13,6 +13,8 @@ func TestExpandDotsError(t *testing.T) {
 		{"[wd]/../../../../hello", "(literal \"/Users/test/hello\")"},
 		{"../../../../hello", "(literal \"/Users/test/hello\")"},
 		{"what/is/this../../../../", "(literal \"/Users/test/hello\")"},
+		{"what/is/this../../../../", "(literal \"/Users/test/hello\")"},
+		{"./what/is/this", "(literal \"/Users/test/hello\")"},
 	}
 
 	paths := types.Paths{LocalConfigPath: "Users/test/sb", HomePath: "/Users/test", RootConfigPath: "Users/test", WorkingDir: "/Users/test/sb", BinPath: "/usr/bin", BinaryPath: "/usr/bin/ls"}
@@ -33,7 +35,6 @@ func TestExpandPathSuccess(t *testing.T) {
 		{"[home]/whatsup", "(literal \"/Users/test/whatsup\")"},
 		{"[bin]/whatsup", "(literal \"/usr/bin/whatsup\")"},
 		{"[wd]/whatsup", "(literal \"/Users/test/sb/whatsup\")"},
-		{"./whatsup", "(literal \"/Users/test/sb/whatsup\")"},
 		{"/Users/test/**", "(regex #\"/Users/test/(.+)\")"},
 		{"/Users/**/test", "(regex #\"/Users/(.+\\/)?test\")"},
 		{"/Users/test/*.js", "(regex #\"/Users/test/[^\\/]*\\.js\")"},

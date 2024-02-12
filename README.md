@@ -1,4 +1,4 @@
-# Reimplementation of node-safe with capability to sandbox every script with custom settings
+# Reimplementation of node-safe with capability to sandbox every script with custom profiles
 - Reimplementation of node-safe (https://github.com/berstend/node-safe) in go
 # Table of Content
 1. [Status](#status)  
@@ -15,6 +15,7 @@
 - v0.1.0 coming soon
 
 ## TODOs
+Sorted by priority
 - [x] Glob support of ../
 - [x] Add support for opening config files with sb and default editor
 - [x] Implement init method
@@ -31,15 +32,18 @@
 - [x] Print command that is run when passing args to sandbox-exec
 - [x] Always apply __root-config__ of root config for binary and show in sb -s command
 - [x] Merge local and root config
+- [x] Vigilant mode, ask at the end to proceed with command and config
+- [x] Possibility to add overall config json file to apply to all commands (discuss if good idea?) - Will be solved with extend keyword
+- [ ] Extend other config file, e.g. commonNode.json could be applied to npm.json, npx.json
+  - [ ] Look for "__extend__" key while parsing. Limit to 2 parent configs
 - [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
   - [x] No array/bool provided
   - [ ] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys)
-- [ ] Add support for removing config files with sb
-- [ ] Possibility to add overall config json file to apply to all commands (discuss if good idea?)
-- [ ] Add TLDR; for README
-- [x] Vigilant mode, ask at the end to proceed with command and config
-- [ ] Option for only applying root or local config ```-c local -c root```
+- [ ] Extend README with complete instructions
 - [ ] More testing for critical parts of the tool
+- [ ] Add support for removing config files with sb
+- [ ] Option for only applying root or local config ```-c local``` ```-c root```
+- [ ] Add TLDR; for README
 
 ## Installation
 **Building from Source**  

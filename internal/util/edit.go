@@ -10,7 +10,7 @@ import (
 	"sb/internal/types"
 )
 
-func EditFile(commands []string, paths types.Paths) {
+func EditFile(commands []string, paths *types.Paths) {
 	if len(commands) != 2 {
 		showError()
 	}
