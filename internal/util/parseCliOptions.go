@@ -6,34 +6,42 @@ import (
 	"strings"
 )
 
-func OptionsParsing(paths *types.Paths, args []string) ([]string, *types.SbConfig, []string) {
-	var options []string
+func OptionsParsing(paths *types.Paths, args []string) (map[string][]string, *types.SbConfig, []string) {
+	var options = map[string][]string{}
 	var cliConfigSb types.SbConfig
 	var cliConfig *types.SbConfig = nil
-	optionsUntilIndex := 0
-	for index, value := range args {
+	index := 0
+	for index < len(args) {
+		value := args[index]
 		if strings.HasPrefix(value, "-") {
-			split, splitValue := parseCliConfigParam(value)
-			if _, exist := types.ValidCliOptions[split]; exist {
-				options = append(options, value)
+			split, splitValue := splitOptionIfPossible(value)
+			if multiOptVal, multiOptionExists := types.ValidCliOptions[split]; multiOptionExists {
+				index, options[split] = parseCliOptions(split, splitValue, args, multiOptVal, index)
 			} else if _, configExists := types.AllowedConfigKeys[split]; configExists && len(splitValue) > 0 {
 				cliConfig = addToCliConfig(paths, cliConfig, cliConfigSb, splitValue, split)
+				index++
 			} else {
 				log.LogErr("You passed a wrong cli option: ", value)
 			}
 		} else {
-			optionsUntilIndex = index
 			break
 		}
 	}
 	var commands []string
 	if len(args) != len(options) {
-		commands = args[optionsUntilIndex:]
+		commands = args[index:]
 	}
-	if cliConfig != nil {
-		return options, cliConfig, commands
+	return options, cliConfig, commands
+}
+
+func parseCliOptions(split string, splitValue string, args []string, multiOptVal int, index int) (int, []string) {
+	if splitValue == "" {
+		if len(args) < multiOptVal+index {
+			log.LogErr("You passed an option which requires additional arguments", split)
+		}
+		return index + multiOptVal, args[index : multiOptVal+index]
 	} else {
-		return options, nil, commands
+		return index + 1, []string{split, splitValue}
 	}
 }
 
@@ -91,7 +99,7 @@ func addToConfig(config *types.SbConfig, key string, value string) *types.SbConf
 	return config
 }
 
-func parseCliConfigParam(s string) (string, string) {
+func splitOptionIfPossible(s string) (string, string) {
 	split := strings.SplitN(s, "=", 2)
 	if len(split) == 2 {
 		return split[0], split[1]

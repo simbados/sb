@@ -81,26 +81,41 @@ func parseEnvs() {
 }
 
 func checkCliOptions(context *types.Context, commands []string) {
-	for _, currentOption := range context.Config.CliOptions {
+	for currentOption, value := range context.Config.CliOptions {
 		if currentOption == "--debug" || currentOption == "-d" {
 			types.CliOptions.DebugEnabled = true
 		} else if currentOption == "--dry-run" || currentOption == "-dr" {
 			types.CliOptions.DryRunEnabled = true
-		} else if currentOption == "--create-exe" || currentOption == "-ce" {
-			types.CliOptions.CreateExeEnabled = true
 		} else if currentOption == "--help" || currentOption == "-h" {
+			onlyThisOptionAllowed(len(context.Config.CliOptions), currentOption)
 			util.PrintHelp()
 		} else if currentOption == "--version" || currentOption == "-v" {
+			onlyThisOptionAllowed(len(context.Config.CliOptions), currentOption)
 			util.ShowVersion()
 		} else if currentOption == "--init" || currentOption == "-i" {
+			onlyThisOptionAllowed(len(context.Config.CliOptions), currentOption)
 			util.Init(&context.Paths)
 		} else if currentOption == "--edit" || currentOption == "-e" {
+			onlyThisOptionAllowed(len(context.Config.CliOptions), currentOption)
 			util.EditFile(commands, &context.Paths)
 		} else if currentOption == "--show" || currentOption == "-s" {
+			onlyThisOptionAllowed(len(context.Config.CliOptions), currentOption)
 			types.CliOptions.ShowConfigEnabled = true
 		} else if currentOption == "--vigilant" || currentOption == "-vi" {
 			types.CliOptions.VigilantModeEnabled = true
+		} else if currentOption == "--config" || currentOption == "-c" {
+			fmt.Println(currentOption, value)
+			if len(value) != 2 {
+				log.LogErr("You can not call config mode without providing local, root or path as config source")
+			}
+			types.CliOptions.ConfigModeEnabled = value[1]
 		}
+	}
+}
+
+func onlyThisOptionAllowed(length int, option string) {
+	if length != 1 {
+		log.LogErr(fmt.Sprintf("%v option can only be used in isolation and not in combination with other options", option))
 	}
 }
 
@@ -112,6 +127,9 @@ func setConfigParams(context *types.Context, args []string) {
 	}
 	// Check which options are enabled from the user
 	checkCliOptions(context, commands)
+	if len(commands) < 1 {
+		log.LogErr("Please specify the binary, no command provided")
+	}
 	context.Paths.BinaryPath = getPathToExecutable(commands[0])
 	context.Config.BinaryName = commands[0]
 	context.Config.Commands = commands[1:]

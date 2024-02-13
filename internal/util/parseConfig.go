@@ -50,9 +50,19 @@ func LocalConfigPath(paths *types.Paths, binaryName string) (string, bool) {
 
 // ConfigFileParsing Here we only parse the config files, cli configs have already been parsed
 func ConfigFileParsing(context *types.Context) *types.SbConfig {
-	localConfig := extractLocalConfig(context)
-	rootConfig := extractRootConfig(context)
-	return mergeConfigs(localConfig, rootConfig)
+	var configs []*types.SbConfig
+	configMode := types.CliOptions.ConfigModeEnabled
+	if configMode == "" {
+		return mergeConfigs(extractLocalConfig(context), extractRootConfig(context))
+	}
+	if configMode == "local" {
+		configs = append(configs, extractLocalConfig(context))
+	} else if configMode == "root" {
+		configs = append(configs, extractRootConfig(context))
+	} else {
+		configs = append(configs, extractConfigFromPath(context, configMode))
+	}
+	return mergeConfigs(configs...)
 }
 
 func extractLocalConfig(context *types.Context) *types.SbConfig {
@@ -74,6 +84,16 @@ func extractRootConfig(context *types.Context) *types.SbConfig {
 	if exists {
 		globalConfig := parseJsonConfig(&context.Paths, binaryGlobalConfigPath, context.Config.Commands, 1)
 		return globalConfig
+	}
+	return nil
+}
+
+func extractConfigFromPath(context *types.Context, path string) *types.SbConfig {
+	_, err := DoesPathExist(path)
+	if err == nil {
+		return parseJsonConfig(&context.Paths, path, context.Config.Commands, 1)
+	} else {
+		log.LogErr(err)
 	}
 	return nil
 }

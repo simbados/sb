@@ -40,8 +40,8 @@ Sorted by priority
   - [x] No array/bool provided
   - [x] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys) - handled with schema validation
 - [x] Add json schema
-- [ ] Option for only applying root or local config ```-c local``` ```-c root```
-  - [ ] Option for selecting one specific sandbox profile ```-sp="/Users/test/.sb-config/npm.json```
+- [x] Option for only applying root or local config ```-c=local``` ```-c=root```
+  - [x] Option for selecting one specific sandbox profile ```-c="/Users/test/.sb-config/npm.json```
 - [ ] Better project structure with composition and no global state
 - [ ] Extend README with complete instructions
 - [ ] More testing for critical parts of the tool
