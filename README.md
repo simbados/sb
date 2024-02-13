@@ -36,16 +36,16 @@ Sorted by priority
 - [x] Possibility to add overall config json file to apply to all commands (discuss if good idea?) - Will be solved with extend keyword
 - [x] Extend other config file, e.g. commonNode.json could be applied to npm.json, npx.json
   - [x] Look for "__extend__" key while parsing. Limit to 2 parent configs
-- [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
+- [x] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
   - [x] No array/bool provided
-  - [ ] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys)
-- [ ] Better project structure with composition and no global state
-- [ ] Extend README with complete instructions
-- [ ] Add json schema
-- [ ] More testing for critical parts of the tool
-- [ ] Add support for removing config files with sb
+  - [x] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys) - handled with schema validation
+- [x] Add json schema
 - [ ] Option for only applying root or local config ```-c local``` ```-c root```
   - [ ] Option for selecting one specific sandbox profile ```-sp="/Users/test/.sb-config/npm.json```
+- [ ] Better project structure with composition and no global state
+- [ ] Extend README with complete instructions
+- [ ] More testing for critical parts of the tool
+- [ ] Add support for removing config files with sb
 - [ ] Add TLDR; for README
 
 ## Installation

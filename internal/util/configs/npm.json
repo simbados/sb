@@ -1,4 +1,5 @@
 {
+	"$schema": "https://raw.githubusercontent.com/simbados/sb/main/schema/schema.json",
 	"__root-config__": {
 		"read": [
 			"**/node_modules/**/*.js",

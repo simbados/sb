@@ -1,9 +1,24 @@
 {
+  "$schema": "https://raw.githubusercontent.com/simbados/sb/main/schema/schema.json",
   "__root-config__": {
-    "read": ["**/node_modules/**/*.js", "**/node_modules/**/*.jsx", "**/node_modules/**/*.json", "**/node_modules/**/*.ts", "**/node_modules/**/*.cjs", "**/node_modules/**/*.mjs",
+    "read": [
+      "**/node_modules/**/*.js",
+      "**/node_modules/**/*.jsx",
+      "**/node_modules/**/*.json",
+      "**/node_modules/**/*.ts",
+      "**/node_modules/**/*.cjs",
+      "**/node_modules/**/*.mjs",
       "[wd]/*.js"
     ],
-    "read-write": ["[wd]/*.js", "[wd]/*.cjs", "[wd]/*.jsx", "[wd]/package.json", "[wd]/package-lock.json", "../package.json", "../package-lock.json"],
+    "read-write": [
+      "[wd]/*.js",
+      "[wd]/*.cjs",
+      "[wd]/*.jsx",
+      "[wd]/package.json",
+      "[wd]/package-lock.json",
+      "../package.json",
+      "../package-lock.json"
+    ],
     "net-out": true,
     "net-in": true
   }
