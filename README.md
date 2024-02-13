@@ -39,10 +39,13 @@ Sorted by priority
 - [ ] Validate json config files, if anything can not be parsed return error (e.g. no array provided)
   - [x] No array/bool provided
   - [ ] Config keys duplicated (can lead to bug that only first config is applied, disallow double config keys)
+- [ ] Better project structure with composition and no global state
 - [ ] Extend README with complete instructions
+- [ ] Add json schema
 - [ ] More testing for critical parts of the tool
 - [ ] Add support for removing config files with sb
 - [ ] Option for only applying root or local config ```-c local``` ```-c root```
+  - [ ] Option for selecting one specific sandbox profile ```-sp="/Users/test/.sb-config/npm.json```
 - [ ] Add TLDR; for README
 
 ## Installation

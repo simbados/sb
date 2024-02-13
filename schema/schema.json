@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schema for sb",
+  "description": "Schema for validating sb configuration files",
+  "type": "object",
+  "properties": {
+    "__extends__": {
+      "type": "string",
+      "description": "Which configuration files to extend"
+    },
+    "__root-config__": {
+      "$ref": "#/$defs/config",
+      "description": "root configuration"
+    }
+  },
+  "additionalProperties": {
+    "$ref": "#/$defs/config",
+    "description": "Configuration for all additional commands"
+  },
+  "$defs": {
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "type": "Array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Allow which files to read"
+        },
+        "write": {
+          "type": "Array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Allow which files to write"
+        },
+        "read-write": {
+          "type": "Array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Allow which files to read and write"
+        },
+        "process": {
+          "type": "Array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Allow which files to read and write"
+        },
+        "net-in": {
+          "type": "boolean",
+          "description": "Allow outgoing network connections"
+        },
+        "net-out": {
+          "type": "boolean",
+          "description": "Allow ingoing network connections"
+        }
+      }
+    }
+  }
+}

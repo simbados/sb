@@ -1,0 +1,14 @@
+{
+  "$schema": "schema.json",
+  "__extends__": "~/test",
+  "__root-config__": {
+    "read": ["~/testit"],
+    "read-write": ["~/yolo"],
+    "process": ["~/whatup"],
+    "net-in": true,
+    "net-out": true
+  },
+  "run dev": {
+    "read-write": ["yo"]
+  }
+}

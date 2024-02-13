@@ -23,13 +23,11 @@ func ParseJson(path string) map[string]interface{} {
 	fileContent, err := os.ReadFile(path)
 	if err != nil {
 		log.LogErr("Error while reading file at path: ", path)
-		os.Exit(1)
 	}
 	var jsonFile map[string]interface{}
 
 	if err := json.Unmarshal(fileContent, &jsonFile); err != nil {
 		log.LogErr("Error while parsing json file at path: ", path, err)
-		os.Exit(1)
 	}
 	return jsonFile
 }
