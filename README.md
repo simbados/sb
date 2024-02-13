@@ -72,34 +72,13 @@ There are 3 ways to configure sb
 None are mandatory, but if you do not provide any arguments the program will have nearly no permissions
 
 1. Global Config: If you have a stuff that should always be applied to your config,
-you should put it into $HOME/.sb-config/\<name-of-your-binary\>.json with the structure:  
-\> .sbconfig  
-&emsp; \> npm.json  
-&emsp; \> ls.json  
-Now the structure of one such json file is as followed (npm.json): 
-```
-{
-	"__root-config__": {
-		"read": ["~/temp"],
-		"write": ["~/writeThisDir"],
-		"net-out": false,
-		"net-in": false
-	},
-	"install" : {
-		"read": ["[wd]/**"],
-		"write": ["[wd]/package.json"],
-		"net-out": true,
-		"net-in": true
-	}
-}
-```
-`__root-config__` will be applied for all commands of a binary, e.g. npm install will trigger building of a sandbox  
-profile with `__root-config__` and `install`
+you should put it into $HOME/.sb-config/\<name-of-your-binary\>.json  
+
 2. Local Config: Sb will look for a .sb-config/ directory in your current directory and subdirectories.  
-So if your current directory is ~/stuff/develop  
-Sb will look for .sb-directory in subdirectories up till your home folder.  
-So it will look in /Users/\<user\>/stuff/.sb-config and /Users/\<users\>/.sb-config  
-Uses the same structure as the global config  
+So if your current directory is ~/stuff/develop. Sb will look for a .sb-directory including parent directories up to your home folder.  
+So it will look in ```/Users/<user>/stuff/.sb-config``` and ```/Users/<users>/.sb-config```. Uses the same structure as the global config  
+
+
 3. Cli options: You can pass the options also as cli flags  
 E.g. 
 - ```sb --read="[wd]/**" ls -a```
@@ -114,6 +93,65 @@ all configs allow it. If one config does not allow it, then it will be forbidden
 E.g. root config does allow ```"net-out": true```, but your local config has ```"net-out": false```,
 then net-out will be forbidden.
 
+## Configuration file
+Now the structure of one such json file from the global and local configuration is as followed (npm.json):
+```
+{
+    "__extends__": "[local]/npm.json",
+    "__root-config__": {
+      "read": ["~/temp"],
+      "write": ["~/writeThisDir"],
+      "net-out": false,
+      "net-in": false
+    },
+    "install" : {
+      "read": ["[wd]/**"],
+      "write": ["[wd]/package.json"],
+      "process": ["[bin]/curl"]
+      "net-out": true,
+      "net-in": true
+    }
+}
+```
+Explanation:  
+`__extends__`: Allows extension of another config file, allows path specific identifiers see [Path identifiers](#path-identifiers).  
+Must be string and does not support multiple extensions. The max extension count is currently **2** which might be changed in the future.  
+`__root-config__`: Will be applied for all commands of a binary. E.g. npm install will trigger building of a sandbox profile with `__root-config__` and `install`
+`install`: Will be applied if binary uses command install, e.g. npm install  
+All configuration have the following object (all optional):
+1. `write`: Array of paths - which should be writeable
+2. `read`: Array of paths - which should be readable
+3. `process`: Array of paths - which contains binaries that should be able to be spawned in subprocesses  
+If your script needs curl than you should allow it here.
+4. `net-in`: Boolean - if incoming network traffic should be allowed (e.g. local development web server)
+5. `net-out`: Boolean - if outgoing network traffic should be allowed 
+## Path identifiers
+Path identifiers are special directories that can be used for specifying path in `write`, `read`, `process` arrays and `__extend__` string
+Available identifiers are:
+1. `[wd]`: working directory
+2. `[home]`: home directory
+3. `~`: home directory
+4. `[target]`: directory of the target binary (`sb ls -a` runs ls which is the target binary and which could be located at /usr/bin)
+5. `[bin]`: binary directory of system where most binaries are located (could be wrong so if you make sure a binary is whitelisted add the path to the binary)
+6. `[local]`: local config directory (if exists). E.g. `/Users/<user>/someProject/.sb-config`
+7. `[root]`: root config directory (if exists). E.g. `/Users/<user>/.sb-config`
+
+## Globs
+Following globs are supported for `write`, `read` and `process`.  
+**Attention**: `__extends__` does not support globs, only identifiers
+1. `*`: Should be used only for specifying group of files.  
+`[wd]/*.js` only javascript files in working directory
+2. `**`: (at the end of path): Includes subdirectories and everything included.  
+`[wd]/**` allows everything inside working directory and subdirectories
+3. `**`: (middle of path): Includes subdirectories.  
+   `[wd]/**/hello` Allows paths such as `/Users/home/what/is/this/hello` if `/Users/home/` is working directory
+4. `..`: Not allowed at beginning, because relative path is ambiguous.  
+`[wd]/..` specify one directory above working directory
+
+**One important distinction is that you can allow to read `/Users/home/hello` which does not mean that
+the process can read any files at `/Users/home/hello`, it just means it can see the directory.  
+If you want to allow files inside `hello` than you need to specify it with `/Users/home/hello/**`.**
+
 ## Configuration flags
 
 Run sb --help for all available flags  
@@ -126,6 +164,10 @@ Takes two additional arguments first must be either local/root and second name o
 E.g. ```sb -e root npm``` (edits the npm.json file in the root directory)  
 E.g. ```sb -e local npm``` (edits the npm.json file in the local directory)  
 - --show (-s): Displays which config will be applied for binary, use as ```sb -s npm```
+- --config (-c): Specify which configuration files to use can be local, root or path
+E.g. ```sb -c=root npm``` (uses only root config)  
+E.g. ```sb -c=local npm``` (uses only local config)
+E.g. ```sb -c=/Users/name/hello/npm.json npm``` (uses only config from path)
 
 
 ## FAQS

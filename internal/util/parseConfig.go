@@ -146,7 +146,7 @@ func parseExtendedConfig(paths *types.Paths, path string, commands []string, dep
 	var configs []*types.SbConfig
 	if value, exists := configJson[types.ExtendsConfigKey]; exists {
 		if extendPath, isString := value.(string); isString {
-			extendPathExpanded, pathExpansionError := CommonPathExpansion(paths, extendPath)
+			extendPathExpanded, pathExpansionError := commonPathExpansion(paths, extendPath)
 			if pathExpansionError != nil {
 				log.LogErr(pathExpansionError)
 			}

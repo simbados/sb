@@ -31,7 +31,7 @@ func buildSymbolToPathMatching(paths *types.Paths) map[string]string {
 }
 
 func expandPaths(paths *types.Paths, value string) (string, error) {
-	value, err := CommonPathExpansion(paths, value)
+	value, err := commonPathExpansion(paths, value)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func expandPaths(paths *types.Paths, value string) (string, error) {
 	return value, nil
 }
 
-func CommonPathExpansion(paths *types.Paths, value string) (string, error) {
+func commonPathExpansion(paths *types.Paths, value string) (string, error) {
 	initialPath := value
 	matching := buildSymbolToPathMatching(paths)
 	for key, path := range matching {
