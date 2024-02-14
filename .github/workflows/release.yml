@@ -15,7 +15,11 @@ jobs:
           uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
           with:
             go-version: '1.22.0'
-        - run: go build cmd/sb/sb.go
+        - run: go build -trimpath cmd/sb/sb.go
+          env:
+            GOOS: darwin
+            GOARCH: arm64
+            CGO_ENABLED: 0
         - run: gh release create $TAG -F changelog.md './sb#binary'
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
