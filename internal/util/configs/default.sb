@@ -1,4 +1,3 @@
-; Default node-safe macOS sandbox instructions (hand-crafted after lots of testing)
 (version 1)
 (debug all)
 
@@ -6,7 +5,6 @@
 (deny default)
 
 ; Allow reading file/folder meta data
-; doing this selectively is messy and there's no real risk allowing it
 (allow file-read-metadata)
 
 ; Allow read access to standard system paths
@@ -80,8 +78,7 @@
   (sysctl-name "kern.tcsm_enable")
 )
 
-; Allow the app to send signals
-; I'm not sure if we should move this into the `--allow-run` block though
+; Allow send signals
 (allow signal)
 
 ; Allow connect to localhost

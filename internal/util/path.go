@@ -37,11 +37,13 @@ func expandPaths(paths *types.Paths, value string) (string, error) {
 	}
 	if strings.Contains(value, "*") || strings.Contains(value, ".") {
 		value = regexp.MustCompile(dotRegex).ReplaceAllString(value, dotReplace)
-		if val, err := regexp.Compile(globEndRegex); err == nil && val.MatchString(value) {
-			value = val.ReplaceAllString(value, globEndReplace)
-		} else if val, err := regexp.Compile(globMiddleRegex); err == nil && val.MatchString(value) {
+		if val, _ := regexp.Compile(globMiddleRegex); val.MatchString(value) {
 			value = val.ReplaceAllString(value, globMiddleReplace)
-		} else if val, err := regexp.Compile(globSingleRegex); err == nil && val.MatchString(value) {
+		}
+		if val, _ := regexp.Compile(globEndRegex); val.MatchString(value) {
+			value = val.ReplaceAllString(value, globEndReplace)
+		}
+		if val, _ := regexp.Compile(globSingleRegex); val.MatchString(value) {
 			value = val.ReplaceAllString(value, globSingleReplace)
 		}
 		value = "(regex #\"" + value + "\")"

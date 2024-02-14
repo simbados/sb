@@ -9,10 +9,10 @@
 			"**/node_modules/**/*.cjs",
 			"**/node_modules/**/*.mjs"
 		],
-		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**"],
+		"read-write": ["[wd]/package.json", "[wd]/package-lock.json", "/Users/**/.npm/**", "[wd]/node_modules/**", "[wd]/node_modules"],
 		"process": ["[target]/../../**"],
 		"net-out": true,
-		"net-in": true
+		"net-in": false
 	},
 	"install": {
 		"read-write": ["~/.npmrc", "[wd]/.npmrc"]

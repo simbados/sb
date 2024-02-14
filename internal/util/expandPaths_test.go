@@ -37,6 +37,8 @@ func TestExpandPathSuccess(t *testing.T) {
 		{"[wd]/whatsup", "(literal \"/Users/test/sb/whatsup\")"},
 		{"/Users/test/**", "(regex #\"/Users/test/(.+)\")"},
 		{"/Users/**/test", "(regex #\"/Users/(.+\\/)?test\")"},
+		{"/Users/**/test/*.ts", "(regex #\"/Users/(.+\\/)?test/[^\\/]*\\.ts\")"},
+		{"/Users/**/test/**", "(regex #\"/Users/(.+\\/)?test/(.+)\")"},
 		{"/Users/test/*.js", "(regex #\"/Users/test/[^\\/]*\\.js\")"},
 		{"[wd]/../hello", "(literal \"/Users/test/hello\")"},
 		{"[wd]/../hello/../what", "(literal \"/Users/test/what\")"},
